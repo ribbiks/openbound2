@@ -12,6 +12,8 @@ public:
     template<typename U>
     vec2(const vec2<U>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)) {}
 
+    vec2(const vec2& other) : x(other.x), y(other.y) {}
+
     vec2(std::initializer_list<T> list) {
         auto it = list.begin();
         if (it != list.end()) {

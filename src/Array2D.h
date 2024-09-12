@@ -13,15 +13,15 @@ private:
 public:
     Array2D() : rows(0), cols(0) {}
 
-    Array2D(int rows, int cols, const std::vector<T>& original) 
+    Array2D(size_t rows, size_t cols, const std::vector<T>& original) 
         : rows(rows), cols(cols) {
         if (rows * cols != original.size()) {
             throw std::invalid_argument("Input vector size does not match the specified dimensions");
         }
         data.resize(rows);
-        for (int i = 0; i < rows; ++i) {
+        for (size_t i = 0; i < rows; ++i) {
             data[i].resize(cols);
-            for (int j = 0; j < cols; ++j) {
+            for (size_t j = 0; j < cols; ++j) {
                 data[i][j] = original[i + j * rows];
             }
         }

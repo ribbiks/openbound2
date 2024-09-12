@@ -1,23 +1,17 @@
-# Makefile for C++ project with native and WebAssembly compilation
-
-# Compiler and flags
+# compilers and flags
 CXX := g++
 EMXX := emcc
 CXXFLAGS := -std=c++11 -lSDL2 -lSDL2_image -lfmt -Wall -Wextra
 EMXXFLAGS := -std=c++11 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='["png"]' -lfmt --preload-file assets --preload-file maps
 
-# Include and library directories
+# include and library directories
 SRC_DIR := src
-INCLUDE_DIR := third-party
-LIB_DIR := lib
-LIB_DIR_WASM := lib_wasm
 OBJ_DIR := obj
 
-# Update flags to include subdirectories
-CXXFLAGS += -I$(INCLUDE_DIR) -L$(LIB_DIR) -I/opt/local/include -L/opt/local/lib
-EMXXFLAGS += -I$(INCLUDE_DIR) -L$(LIB_DIR_WASM)
+CXXFLAGS += -Ithird-party -Llib -I/opt/local/include -L/opt/local/lib
+EMXXFLAGS += -Ithird-party -Llib_wasm
 
-# Source files and objects
+# sources and objects
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 OBJS := $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
@@ -26,33 +20,31 @@ DEPS := $(OBJS:.o=.d)
 NATIVE_TARGET := openbound
 WASM_TARGET := openbound.html
 
-# Default target
+# default target
 all: native
 
-# Native compilation
+# native compilation
 native: $(NATIVE_TARGET)
 
 $(NATIVE_TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
-# WebAssembly compilation
+# webassembly compilation
 wasm: $(WASM_TARGET)
 
 $(WASM_TARGET): $(SRCS)
 	$(EMXX) $(EMXXFLAGS) $^ -o $@
 
-# Object file compilation
+# object file compilation
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -MMD -c $< -o $@
 
-# Clean build artifacts
+# cleanup
 clean:
 	rm -rf $(OBJ_DIR)
-	rm -f $(NATIVE_TARGET) $(WASM_TARGET) *.wasm *.html
+	rm -f $(NATIVE_TARGET) $(WASM_TARGET) openbound.data openbound.js openbound.wasm
 
-# Include dependency files
 -include $(DEPS)
 
-# Phony targets
 .PHONY: all native wasm clean

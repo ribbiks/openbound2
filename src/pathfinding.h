@@ -47,16 +47,16 @@ bool edge_has_good_incoming_angles(const vec2<int>& v1, const vec2<int>& v2, int
     bool edge1_clear = true;
     bool edge2_clear = true;
     // coming into v1 from v2
-    if (d.x < 0 && d.y < 0 && corner1 & BLOCKED_SE ||
-        d.x < 0 && d.y > 0 && corner1 & BLOCKED_NE ||
-        d.x > 0 && d.y > 0 && corner1 & BLOCKED_NW ||
-        d.x > 0 && d.y < 0 && corner1 & BLOCKED_SW)
+    if ((d.x < 0 && d.y < 0 && corner1 & BLOCKED_SE) ||
+        (d.x < 0 && d.y > 0 && corner1 & BLOCKED_NE) ||
+        (d.x > 0 && d.y > 0 && corner1 & BLOCKED_NW) ||
+        (d.x > 0 && d.y < 0 && corner1 & BLOCKED_SW))
         edge1_clear = false;
     // coming into v2 from v1
-    if (d.x > 0 && d.y > 0 && corner2 & BLOCKED_SE ||
-        d.x > 0 && d.y < 0 && corner2 & BLOCKED_NE ||
-        d.x < 0 && d.y < 0 && corner2 & BLOCKED_NW ||
-        d.x < 0 && d.y > 0 && corner2 & BLOCKED_SW)
+    if ((d.x > 0 && d.y > 0 && corner2 & BLOCKED_SE) ||
+        (d.x > 0 && d.y < 0 && corner2 & BLOCKED_NE) ||
+        (d.x < 0 && d.y < 0 && corner2 & BLOCKED_NW) ||
+        (d.x < 0 && d.y > 0 && corner2 & BLOCKED_SW))
         edge2_clear = false;
     return edge1_clear | edge2_clear;
 }
@@ -175,8 +175,8 @@ PathfindingData get_pathfinding_data(const Array2D<bool>& wall_dat) {
         int filtcount2 = 0;
         int filtcount3 = 0;
         int filtcount4 = 0;
-        for (int i = 0; i < nodes[rid].size(); ++i) {
-            for (int j = i+1; j < nodes[rid].size(); ++j) {
+        for (size_t i = 0; i < nodes[rid].size(); ++i) {
+            for (size_t j = i+1; j < nodes[rid].size(); ++j) {
                 vec2<int> v1 = nodes[rid][i];
                 vec2<int> v2 = nodes[rid][j];
                 int corner1 = blocked_corners[rid][i];
@@ -196,9 +196,9 @@ PathfindingData get_pathfinding_data(const Array2D<bool>& wall_dat) {
                     filtcount1 += 1;
             }
         }
-        for (int i = 0; i < candidate_edges.size(); ++i) {
+        for (size_t i = 0; i < candidate_edges.size(); ++i) {
             bool edge_contains_another_edge = false;
-            for (int j = 0; j < candidate_edges.size(); ++j) {
+            for (size_t j = 0; j < candidate_edges.size(); ++j) {
                 if (i != j && line_contains_line(candidate_edges[i], candidate_edges[j])) {
                     edge_contains_another_edge = true;
                     break;

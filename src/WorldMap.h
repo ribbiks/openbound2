@@ -69,8 +69,8 @@ public:
         }
         // draw pathfinding edges
         vec2<int> pf_edge_adj = {GRIDSIZE/2, GRIDSIZE/2};
-        for (int rid = 0; rid < pf_data.edges.size(); ++rid) {
-            for (int i = 0; i < pf_data.edges[rid].size(); ++i) {
+        for (size_t rid = 0; rid < pf_data.edges.size(); ++rid) {
+            for (size_t i = 0; i < pf_data.edges[rid].size(); ++i) {
                 Line my_line = {GRIDSIZE*pf_data.edges[rid][i].start + pf_edge_adj, GRIDSIZE*pf_data.edges[rid][i].end + pf_edge_adj, PATH_EDGE_COL};
                 my_line.start -= offset;
                 my_line.end -= offset;
@@ -79,8 +79,8 @@ public:
         }
         // draw pathfinding nodes
         vec2<int> pf_node_adj = {GRIDSIZE/2 - PF_NODE_RADIUS/2, GRIDSIZE/2 - PF_NODE_RADIUS/2};
-        for (int rid = 0; rid < pf_data.nodes.size(); ++rid) {
-            for (int i = 0; i < pf_data.nodes[rid].size(); ++i) {
+        for (size_t rid = 0; rid < pf_data.nodes.size(); ++rid) {
+            for (size_t i = 0; i < pf_data.nodes[rid].size(); ++i) {
                 Rect my_rect = {GRIDSIZE*pf_data.nodes[rid][i] + pf_node_adj, {PF_NODE_RADIUS, PF_NODE_RADIUS}, PATH_NODE_COL};
                 my_rect.position -= offset;
                 draw_rect(my_rect, true);
