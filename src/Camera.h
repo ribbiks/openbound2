@@ -1,5 +1,4 @@
 #pragma once
-
 #include <array>
 #include <cmath>
 #include <algorithm>
@@ -18,6 +17,13 @@ float value_clamp(float v, float v_min, float v_max) {
 }
 
 class Camera {
+private:
+    vec2<float> pos;
+    vec2<float> target;
+    std::array<float, 4> bounds;
+    bool locked_x;
+    bool locked_y;
+
 public:
     // default constructor
     Camera() :
@@ -93,11 +99,4 @@ public:
     vec2<int> get_target() const {
         return vec2<int>(std::round(target.x), std::round(target.y));
     }
-
-private:
-    vec2<float> pos;
-    vec2<float> target;
-    std::array<float, 4> bounds;
-    bool locked_x;
-    bool locked_y;
 };

@@ -11,6 +11,12 @@ const SDL_Color DELIM_COL  = {127, 127, 127, 255};
 const SDL_Color TRANS_COL  = {255,   0, 255, 255};
 
 class Font {
+private:
+    int spacing;
+    int char_height;
+    std::unordered_map<char, SDL_Surface*> characters;
+    std::unordered_map<char, int> char_width;
+
 public:
     Font(const std::string& path, SDL_Color color, int scalar = 1)
         : spacing(scalar), char_height(0) {
@@ -119,10 +125,4 @@ public:
 
         return text_surface;
     }
-
-private:
-    int spacing;
-    int char_height;
-    std::unordered_map<char, SDL_Surface*> characters;
-    std::unordered_map<char, int> char_width;
 };

@@ -12,3 +12,4 @@ const int GRIDSIZE = 16;
 
 // how much smaller is the player than a single GRIDSIZE?
 const float PLAYER_RADIUS_EPSILON = 0.01f;
+const float PLAYER_RADIUS = static_cast<double>(GRIDSIZE) / 2;

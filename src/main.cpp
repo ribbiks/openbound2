@@ -9,6 +9,7 @@
 #include "Font.h"
 #include "globals.h"
 #include "inputs.h"
+#include "Mauzling.h"
 #include "misc_gfx.h"
 #include "Vec2.h"
 #include "WorldMap.h"
@@ -29,6 +30,7 @@ player_inputs* inputs = nullptr;
 player_inputs* previous_inputs = nullptr;
 Camera* camera = nullptr;
 WorldMap* world_map = nullptr;
+Mauzling* player = nullptr;
 
 void update_fps() {
     frame_count++;
@@ -59,8 +61,8 @@ void main_loop() {
     // updates that occur every game tick
     while (accumulator >= DT) {
         //
-        if (world_map != nullptr)
-            world_map->update();
+        world_map->update();
+        player->update();
         //
         delete previous_inputs;
         previous_inputs = new player_inputs(*inputs);
@@ -74,9 +76,10 @@ void main_loop() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     //
-    draw_background_grid();
+    draw_background_grid(camera_pos);
     //
     world_map->draw(camera_pos);
+    player->draw(camera_pos);
     //
     draw_text(fmt::format("FPS: {:.2f}", fps), 10, 10, fps_font);
     draw_text(fmt::format("{},{}", inputs->mouse_x, inputs->mouse_y), 10, 30, fps_font);
@@ -100,6 +103,8 @@ int main() {
     //
     vec2<int> mapsize = world_map->get_map_size();
     camera->set_bounds({0, mapsize.x}, {0, mapsize.y});
+    //
+    player = new Mauzling(world_map->get_start_pos(), "assets/sq16.png");
 
     ///////////////////////////////////
     #ifdef __EMSCRIPTEN__ /////////////
@@ -127,9 +132,11 @@ int main() {
     delete inputs;
     delete camera;
     delete world_map;
+    delete player;
     inputs = nullptr;
     camera = nullptr;
     world_map = nullptr;
+    player = nullptr;
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
