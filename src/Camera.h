@@ -6,11 +6,11 @@
 #include "globals.h"
 #include "Vec2.h"
 
-const float CAMERA_NUDGE_SCALAR = 800.0f;
-const float CAMERA_MAX_SPEED = 64.0f;
-const float CAMERA_MOVE_SCALAR = 0.30f;
-const float CAMERA_MOVE_AFFINE = 5.00f;
-const float CAMERA_MIN_MOVE_AMOUNT = 1.00f;
+static const float CAMERA_NUDGE_SCALAR = 800.0f;
+static const float CAMERA_MAX_SPEED = 64.0f;
+static const float CAMERA_MOVE_SCALAR = 0.30f;
+static const float CAMERA_MOVE_AFFINE = 5.00f;
+static const float CAMERA_MIN_MOVE_AMOUNT = 1.00f;
 
 float value_clamp(float v, float v_min, float v_max) {
     return std::min(std::max(v, v_min), v_max);
@@ -20,7 +20,7 @@ class Camera {
 private:
     vec2<float> pos;
     vec2<float> target;
-    std::array<float, 4> bounds;
+    std::array<float,4> bounds;
     bool locked_x;
     bool locked_y;
 
@@ -33,7 +33,7 @@ public:
         locked_x(false), 
         locked_y(false) {}
 
-    Camera(const vec2<float>& pos, const vec2<float>& target, const std::array<float, 4>& bounds) :
+    Camera(const vec2<float>& pos, const vec2<float>& target, const std::array<float,4>& bounds) :
         pos(pos),
         target(target),
         bounds(bounds),
@@ -57,7 +57,7 @@ public:
         target.y = value_clamp(target.y, bounds[2], bounds[3]);
     }
 
-    void set_bounds(vec2<int> xrange, vec2<int> yrange) {
+    void set_bounds(const vec2<int>& xrange, const vec2<int>& yrange) {
         bounds[0] = static_cast<float>(xrange.x);
         bounds[1] = static_cast<float>(xrange.y) - static_cast<float>(RESOLUTION.x);
         bounds[2] = static_cast<float>(yrange.x);

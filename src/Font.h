@@ -6,9 +6,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-const SDL_Color LETTER_COL = {  0,   0,   0, 255};
-const SDL_Color DELIM_COL  = {127, 127, 127, 255};
-const SDL_Color TRANS_COL  = {255,   0, 255, 255};
+#include "globals.h"
 
 class Font {
 private:
@@ -37,7 +35,7 @@ public:
                 Uint32 pixel = pixels[y * font_img->w + x];
                 Uint8 r, g, b, a;
                 SDL_GetRGBA(pixel, font_img->format, &r, &g, &b, &a);
-                if (r == LETTER_COL.r && g == LETTER_COL.g && b == LETTER_COL.b && a == 255) {
+                if (r == FONT_LETTER_COL.r && g == FONT_LETTER_COL.g && b == FONT_LETTER_COL.b && a == 255) {
                     pixels[y * font_img->w + x] = SDL_MapRGBA(font_img->format, color.r, color.g, color.b, 255);
                 }
             }
@@ -52,7 +50,7 @@ public:
             Uint8 r, g, b, a;
             SDL_GetRGBA(pixel, font_img->format, &r, &g, &b, &a);
 
-            if (r == DELIM_COL.r && g == DELIM_COL.g && b == DELIM_COL.b) {
+            if (r == FONT_DELIM_COL.r && g == FONT_DELIM_COL.g && b == FONT_DELIM_COL.b) {
                 SDL_Rect char_rect = {x - current_char_width, 0, current_char_width, font_img->h};
                 SDL_Surface* char_surface = SDL_CreateRGBSurface(0, char_rect.w, char_rect.h, 32, 0, 0, 0, 0);
                 SDL_BlitSurface(font_img, &char_rect, char_surface, nullptr);

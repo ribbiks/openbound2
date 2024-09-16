@@ -64,6 +64,13 @@ bool point_is_on_line_segment(const vec2<int>& p, const Line& line) {
            p.y <= std::max(line.start.y, line.end.y);
 }
 
+bool point_in_box(const vec2<float>& point, const FRect& box) {
+    float right = box.position.x + box.size.x;
+    float bottom = box.position.y + box.size.y;
+    return (point.x >= box.position.x && point.x <= right &&
+            point.y >= box.position.y && point.y <= bottom);
+}
+
 // does line1 contain line2?
 bool line_contains_line(const Line& line1, const Line& line2) {
     return points_are_collinear(line1.start, line1.end, line2.start) &&
@@ -73,13 +80,5 @@ bool line_contains_line(const Line& line1, const Line& line2) {
 }
 
 float angle_clamp(float angle) {
-    if (std::abs(angle) < 1e-6)
-        return 0.0;
-    while (angle < 0)
-        angle += 360;
-    while (angle > 360)
-        angle -= 360;
-    if (std::abs(angle) < 1e-6)
-        return 0.0;
-    return angle;
+    return std::fmod(std::fmod(angle, 360.0f) + 360.0f, 360.0f);
 }

@@ -23,16 +23,16 @@ bool edge_has_good_incoming_angles(const vec2<int>& v1, const vec2<int>& v2, int
     bool edge1_clear = true;
     bool edge2_clear = true;
     // coming into v1 from v2
-    if ((d.x < 0 && d.y < 0 && corner1 & BLOCKED_SE) ||
-        (d.x < 0 && d.y > 0 && corner1 & BLOCKED_NE) ||
-        (d.x > 0 && d.y > 0 && corner1 & BLOCKED_NW) ||
-        (d.x > 0 && d.y < 0 && corner1 & BLOCKED_SW))
+    if ((d.x < 0 && d.y < 0 && corner1 & BlockedDirections::SE) ||
+        (d.x < 0 && d.y > 0 && corner1 & BlockedDirections::NE) ||
+        (d.x > 0 && d.y > 0 && corner1 & BlockedDirections::NW) ||
+        (d.x > 0 && d.y < 0 && corner1 & BlockedDirections::SW))
         edge1_clear = false;
     // coming into v2 from v1
-    if ((d.x > 0 && d.y > 0 && corner2 & BLOCKED_SE) ||
-        (d.x > 0 && d.y < 0 && corner2 & BLOCKED_NE) ||
-        (d.x < 0 && d.y < 0 && corner2 & BLOCKED_NW) ||
-        (d.x < 0 && d.y > 0 && corner2 & BLOCKED_SW))
+    if ((d.x > 0 && d.y > 0 && corner2 & BlockedDirections::SE) ||
+        (d.x > 0 && d.y < 0 && corner2 & BlockedDirections::NE) ||
+        (d.x < 0 && d.y < 0 && corner2 & BlockedDirections::NW) ||
+        (d.x < 0 && d.y > 0 && corner2 & BlockedDirections::SW))
         edge2_clear = false;
     return edge1_clear | edge2_clear;
 }
@@ -43,15 +43,15 @@ bool edge_never_turns_towards_wall(const vec2<int>& v1, const vec2<int>& v2, int
     if (std::abs(d.x) > std::abs(d.y)) {
         if (v1.x > v2.x)
             corners = {corner2, corner1};
-        if ((corners.x == BLOCKED_NW && corners.y == BLOCKED_NE) ||
-            (corners.x == BLOCKED_SW && corners.y == BLOCKED_SE))
+        if ((corners.x == BlockedDirections::NW && corners.y == BlockedDirections::NE) ||
+            (corners.x == BlockedDirections::SW && corners.y == BlockedDirections::SE))
             return false;
     }
     else {
         if (v1.y > v2.y)
             corners = {corner2, corner1};
-        if ((corners.x == BLOCKED_NW && corners.y == BLOCKED_SW) ||
-            (corners.x == BLOCKED_NE && corners.y == BLOCKED_SE))
+        if ((corners.x == BlockedDirections::NW && corners.y == BlockedDirections::SW) ||
+            (corners.x == BlockedDirections::NE && corners.y == BlockedDirections::SE))
             return false;
     }
     return true;
@@ -128,10 +128,10 @@ PathfindingData get_pathfinding_data(const Array2D<bool>& wall_dat) {
                     nodes[my_region_id].push_back({x, y});
                     blocked_corners[my_region_id].push_back(0);
                     int vec_ind = blocked_corners[my_region_id].size() - 1;
-                    if (!a) blocked_corners[my_region_id][vec_ind] += BLOCKED_NW;
-                    if (!c) blocked_corners[my_region_id][vec_ind] += BLOCKED_NE;
-                    if (!f) blocked_corners[my_region_id][vec_ind] += BLOCKED_SW;
-                    if (!h) blocked_corners[my_region_id][vec_ind] += BLOCKED_SE;
+                    if (!a) blocked_corners[my_region_id][vec_ind] += BlockedDirections::NW;
+                    if (!c) blocked_corners[my_region_id][vec_ind] += BlockedDirections::NE;
+                    if (!f) blocked_corners[my_region_id][vec_ind] += BlockedDirections::SW;
+                    if (!h) blocked_corners[my_region_id][vec_ind] += BlockedDirections::SE;
                 }
             }
         }

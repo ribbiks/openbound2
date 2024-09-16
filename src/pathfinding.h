@@ -6,7 +6,6 @@
 #include "Array2D.h"
 #include "geometry.h"
 #include "globals.h"
-#include "misc_gfx.h"
 #include "Vec2.h"
 
 struct PathfindingData {
@@ -16,11 +15,11 @@ struct PathfindingData {
     std::vector<std::vector<Line>> edges;
 };
 
-enum {
-    BLOCKED_NW = 1,
-    BLOCKED_NE = 2,
-    BLOCKED_SW = 4,
-    BLOCKED_SE = 8
+struct BlockedDirections {
+    static const int NW = 1;
+    static const int NE = 2;
+    static const int SW = 4;
+    static const int SE = 8;
 };
 
 bool line_of_sight_unit(const vec2<int>& v1, const vec2<int>& v2, const Array2D<bool>& wall_dat);

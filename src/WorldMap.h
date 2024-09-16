@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 
 #include "Array2D.h"
+#include "geometry.h"
 #include "globals.h"
 #include "misc_gfx.h"
 #include "pathfinding.h"
@@ -72,7 +73,7 @@ public:
         //
     }
 
-    void draw(const vec2<int> offset) {
+    void draw(const vec2<int>& offset) {
         // draw impassable tiles
         for (int i = 0; i < wall_dat.width(); ++i) {
             for (int j = 0; j < wall_dat.height(); ++j) {
