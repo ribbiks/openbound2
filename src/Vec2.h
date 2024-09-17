@@ -1,7 +1,5 @@
 #pragma once
 
-#include <fmt/format.h>
-
 template<typename T>
 class vec2 {
 public:
@@ -77,10 +75,5 @@ public:
     template<typename U>
     friend vec2 operator*(U scalar, const vec2& v) {
         return v * scalar;
-    }
-
-    // to_string
-    std::string to_string() const {
-        return fmt::format("{},{}", x, y);
     }
 };

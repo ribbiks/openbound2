@@ -16,6 +16,10 @@ struct player_inputs {
     bool move_down;
     bool move_left;
     bool move_right;
+    bool key_enter;
+    bool key_space;
+    bool key_shift;
+    bool key_escape;
     bool quit;
 
     // default constructor
@@ -36,6 +40,10 @@ struct player_inputs {
         move_down(other.move_down),
         move_left(other.move_left),
         move_right(other.move_right),
+        key_enter(other.key_enter),
+        key_space(other.key_space),
+        key_shift(other.key_shift),
+        key_escape(other.key_escape),
         quit(other.quit) {}
 };
 

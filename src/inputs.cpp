@@ -60,6 +60,19 @@ void get_inputs(player_inputs* inputs) {
                 case SDLK_RIGHT:
                     inputs->move_right = true;
                     break;
+                case SDLK_SPACE:
+                    inputs->key_space = true;
+                    break;
+                case SDLK_RETURN:
+                    inputs->key_enter = true;
+                    break;
+                case SDLK_LSHIFT:
+                case SDLK_RSHIFT:
+                    inputs->key_shift = true;
+                    break;
+                case SDLK_ESCAPE:
+                    inputs->key_escape = true;
+                    break;
             }
         }
         else if (e.type == SDL_KEYUP) {
@@ -79,6 +92,19 @@ void get_inputs(player_inputs* inputs) {
                 case SDLK_d:
                 case SDLK_RIGHT:
                     inputs->move_right = false;
+                    break;
+                case SDLK_SPACE:
+                    inputs->key_space = false;
+                    break;
+                case SDLK_RETURN:
+                    inputs->key_enter = false;
+                    break;
+                case SDLK_LSHIFT:
+                case SDLK_RSHIFT:
+                    inputs->key_shift = false;
+                    break;
+                case SDLK_ESCAPE:
+                    inputs->key_escape = false;
                     break;
             }
         }

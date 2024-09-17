@@ -2,21 +2,21 @@
 #include <emscripten.h>
 #endif
 
+#include <memory>
 #include <SDL2/SDL.h>
 #include <fmt/format.h>
 
-#include "Camera.h"
 #include "Font.h"
 #include "globals.h"
+#include "g_game.h"
 #include "inputs.h"
-#include "Mauzling.h"
 #include "misc_gfx.h"
 #include "Vec2.h"
-#include "WorldMap.h"
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
 bool quit = false;
+std::unique_ptr<Game> game;
 
 Font* fps_font = nullptr;
 Uint32 frame_count, frame_time, prev_time = 0;
@@ -28,9 +28,6 @@ int current_tic = 0;
 
 player_inputs* inputs = nullptr;
 player_inputs* previous_inputs = nullptr;
-Camera* camera = nullptr;
-WorldMap* world_map = nullptr;
-Mauzling* player = nullptr;
 
 void update_fps() {
     frame_count++;
@@ -51,22 +48,19 @@ void main_loop() {
     // updates that occur every frame (camera, mouse cursors)
     update_fps();
     get_inputs(inputs);
+    game->update(inputs, frame_time);
     quit = inputs->quit;
     //
-    camera->nudge_target(inputs->move_up, inputs->move_down, inputs->move_left, inputs->move_right, frame_time);
-    vec2<int> camera_pos = camera->get_pos();
-    vec2<int> camera_tgt = camera->get_target();
-    camera->update(frame_time);
+    vec2<int> camera_pos = game->get_camera_pos();
+    vec2<int> camera_tgt = game->get_camera_target();
 
     // updates that occur every game tick
     while (accumulator >= DT) {
         //
-        world_map->update();
-        player->update();
+        game->tick();
         //
         delete previous_inputs;
         previous_inputs = new player_inputs(*inputs);
-        //
         previous_update_time = current_time;
         accumulator -= DT;
         current_tic++;
@@ -78,8 +72,7 @@ void main_loop() {
     //
     draw_background_grid(camera_pos);
     //
-    world_map->draw(camera_pos);
-    player->draw(camera_pos);
+    game->draw();
     //
     draw_text(fmt::format("FPS: {:.2f}", fps), 10, 10, fps_font);
     draw_text(fmt::format("{},{}", inputs->mouse_x, inputs->mouse_y), 10, 30, fps_font);
@@ -91,20 +84,13 @@ void main_loop() {
 
 int main() {
     SDL_Init(SDL_INIT_VIDEO);
+    game = std::unique_ptr<Game>(new Game());
 
     bool vsync = false;
 
     SDL_Color fps_text_color = {255, 255, 255, 255};
     fps_font = new Font("assets/small_font.png", fps_text_color, 2);
-
     inputs = new player_inputs;
-    camera = new Camera();
-    world_map = new WorldMap("maps/blah.json");
-    //
-    vec2<int> mapsize = world_map->get_map_size();
-    camera->set_bounds({0, mapsize.x}, {0, mapsize.y});
-    //
-    player = new Mauzling(world_map->get_start_pos(), "assets/sq16.png");
 
     ///////////////////////////////////
     #ifdef __EMSCRIPTEN__ /////////////
@@ -130,13 +116,7 @@ int main() {
     fps_font = nullptr;
 
     delete inputs;
-    delete camera;
-    delete world_map;
-    delete player;
     inputs = nullptr;
-    camera = nullptr;
-    world_map = nullptr;
-    player = nullptr;
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

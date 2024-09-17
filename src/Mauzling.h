@@ -56,17 +56,17 @@ private:
     std::queue<PlayerOrder> incoming_orders;
 
 public:
-    // default constructor
-    Mauzling() :
-        player_position(0.0f, 0.0f),
-        player_angle(0.0f),
-        player_radius(PLAYER_RADIUS),
-        surface_debug(nullptr),
-        surface_ellipse(nullptr),
-        player_state(0),
-        iscript_ind(0),
-        player_is_selected(false),
-        incoming_orders() {}
+    //// default constructor
+    //Mauzling() :
+    //    player_position(0.0f, 0.0f),
+    //    player_angle(0.0f),
+    //    player_radius(PLAYER_RADIUS),
+    //    surface_debug(nullptr),
+    //    surface_ellipse(nullptr),
+    //    player_state(0),
+    //    iscript_ind(0),
+    //    player_is_selected(false),
+    //    incoming_orders() {}
 
     Mauzling(const vec2<float>& pos, std::string image_filename) :
         player_position(pos),

@@ -47,7 +47,6 @@ void draw_text(const std::string& text, int x, int y, Font* font) {
 }
 
 SDL_Surface* draw_ellipse(int width, int height, SDL_Color color) {
-    // create surface
     SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
     if (!surface) {
         return nullptr;
@@ -63,7 +62,6 @@ SDL_Surface* draw_ellipse(int width, int height, SDL_Color color) {
         double angle = i * ANGLE_SCALAR;
         int x = width / 2 + static_cast<int>((width / 2 - 1) * cos(angle));
         int y = height / 2 + static_cast<int>((height / 2 - 1) * sin(angle));
-        
         if (x >= 0 && x < width && y >= 0 && y < height) {
             pixels[y * surface->w + x] = pixel_color;
         }
