@@ -20,8 +20,8 @@ void Game::update(player_inputs* inputs, double frame_time) {
     current_state->update(this, inputs, frame_time);
 }
 
-void Game::tick(){
-    current_state->tick(this);
+void Game::tick(player_inputs* inputs){
+    current_state->tick(this, inputs);
 }
 
 void Game::draw() {

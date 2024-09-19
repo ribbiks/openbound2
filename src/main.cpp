@@ -57,7 +57,7 @@ void main_loop() {
     // updates that occur every game tick
     while (accumulator >= DT) {
         //
-        game->tick();
+        game->tick(inputs);
         //
         delete previous_inputs;
         previous_inputs = new player_inputs(*inputs);

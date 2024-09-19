@@ -19,6 +19,6 @@ public:
     WorldMap(const std::string& map_filename);
     vec2<int> get_map_size();
     vec2<int> get_start_pos();
-    void update();
+    void tick();
     void draw(const vec2<int>& offset);
 };

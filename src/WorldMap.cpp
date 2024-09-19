@@ -59,7 +59,7 @@ vec2<int> WorldMap::get_start_pos() {
     return GRIDSIZE * player_start + vec2<int>({GRIDSIZE/2, GRIDSIZE/2});
 }
 
-void WorldMap::update() {
+void WorldMap::tick() {
     //
 }
 

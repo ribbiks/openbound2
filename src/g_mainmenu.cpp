@@ -24,7 +24,7 @@ void G_MainMenu::update(Game* game, player_inputs* inputs, double frame_time) {
     }
 }
 
-void G_MainMenu::tick(Game* game) {
+void G_MainMenu::tick(Game* game, player_inputs* inputs) {
     //
 }
 

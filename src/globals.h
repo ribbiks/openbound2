@@ -29,4 +29,5 @@ const SDL_Color WALL_TILE_COL = { 87,  65, 117, 255}; // pal blue 4
 const SDL_Color GRID_MINOR_COL = {22, 22, 22, 255};
 const SDL_Color GRID_MAJOR_COL = {36, 36, 36, 255};
 
-const SDL_Color UNIT_ELLIPSE_COL = {50, 200, 50, 255};
+const SDL_Color SELECTION_BOX_COL = {50, 200, 50, 255};
+const SDL_Color UNIT_ELLIPSE_COL  = {50, 200, 50, 255};

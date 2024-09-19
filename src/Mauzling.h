@@ -14,7 +14,7 @@
 extern SDL_Renderer* renderer;
 
 static const std::array<float,7> MOVE_CYCLE = {2.0f, 8.0f, 9.0f, 5.0f, 6.0f, 7.0f, 2.0f};
-static const int TURN_SPEED = 40;
+static const float TURN_SPEED = 40; // degrees per tick
 
 //
 // pathing / click delay stuff
@@ -55,19 +55,59 @@ private:
     bool player_is_selected;
     std::queue<PlayerOrder> incoming_orders;
 
-public:
-    //// default constructor
-    //Mauzling() :
-    //    player_position(0.0f, 0.0f),
-    //    player_angle(0.0f),
-    //    player_radius(PLAYER_RADIUS),
-    //    surface_debug(nullptr),
-    //    surface_ellipse(nullptr),
-    //    player_state(0),
-    //    iscript_ind(0),
-    //    player_is_selected(false),
-    //    incoming_orders() {}
+    int get_turn_delay(float d_angle) {
+        d_angle = std::abs(d_angle);
+        if (d_angle <= TURN_SPEED) {
+            return (player_state == PlayerState::MOVING || player_state == PlayerState::TURNING) ? 0 : 1;
+        }
+        return static_cast<int>(d_angle / TURN_SPEED);
+    }
 
+    std::queue<float> get_turn_angles(const vec2<float>& start_position, const vec2<float>& goal_position, float start_angle) {
+        vec2<float> dv = goal_position - start_position;
+        float g_ang = angle_clamp(-std::atan2(dv.y, dv.x) * RADIAN_SCALAR);
+        float d_ang = angle_clamp(g_ang - start_angle);
+        if (d_ang > 180.0f)
+            d_ang -= 360.0f;
+        bool is_clockwise = d_ang > 0;
+
+        // TODO: reimplement clicking-against-wall logic
+
+        int num_turn_frames = get_turn_delay(std::abs(d_ang));
+        std::queue<float> upcoming_angs;
+        if (num_turn_frames > 1) {
+            float turn_increment = is_clockwise ? -TURN_SPEED : TURN_SPEED;
+            float current_angle = start_angle;
+            for (int i = 1; i < num_turn_frames; ++i) {
+                current_angle = angle_clamp(current_angle + turn_increment);
+                upcoming_angs.push(current_angle);
+            }
+        }
+        else if (num_turn_frames == 1) {
+            if (std::abs(d_ang) <= TURN_SPEED)
+                upcoming_angs.push(g_ang);
+            else {
+                float turn_increment = is_clockwise ? -TURN_SPEED : TURN_SPEED;
+                upcoming_angs.push(angle_clamp(start_angle + turn_increment));
+            }
+        }
+        upcoming_angs.push(g_ang);
+        return upcoming_angs;
+    }
+
+    void reset_iscript() {
+        iscript_ind = 0;
+    }
+
+    void increment_iscript() {
+        iscript_ind = (iscript_ind + 1) % MOVE_CYCLE.size();
+    }
+
+    float get_current_speed() {
+        return MOVE_CYCLE[iscript_ind];
+    }
+
+public:
     Mauzling(const vec2<float>& pos, std::string image_filename) :
         player_position(pos),
         player_angle(angle_clamp(45.0f)),
@@ -94,25 +134,6 @@ public:
     ~Mauzling() {
         if (surface_debug)
             SDL_FreeSurface(surface_debug);
-    }
-
-    void get_turn_angles(const vec2<float>& start_position, const vec2<float>& goal_position, float start_angle) {
-        vec2<float> dv = goal_position - start_position;
-        float g_ang = angle_clamp(-std::atan2(dv.y, dv.x) * RADIAN_SCALAR);
-        float d_ang = std::fmod(g_ang - start_angle + 180.0f, 360.0f) - 180.0f;
-        bool is_clockwise = d_ang > 0;
-    }
-
-    void reset_iscript() {
-        iscript_ind = 0;
-    }
-
-    void increment_iscript() {
-        iscript_ind = (iscript_ind + 1) % MOVE_CYCLE.size();
-    }
-
-    float get_current_speed() {
-        return MOVE_CYCLE[iscript_ind];
     }
 
     void update_position(const vec2<float>& pos) {
@@ -149,7 +170,7 @@ public:
         }
     }
 
-    void update() {
+    void tick() {
         //
     }
 
