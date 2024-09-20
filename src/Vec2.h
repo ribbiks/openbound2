@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 
 template<typename T>
 class vec2 {
@@ -75,5 +76,9 @@ public:
     template<typename U>
     friend vec2 operator*(U scalar, const vec2& v) {
         return v * scalar;
+    }
+
+    T length() {
+        return std::sqrt(x * x + y * y);
     }
 };

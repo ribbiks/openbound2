@@ -43,6 +43,15 @@ struct PlayerOrder {
     bool is_queue;
 };
 
+struct AcceptedOrder {
+    vec2<int> goal_coordinates;
+    int accept_delay;
+    bool request_new_paths;
+    vec2<int> clicked_coordinates;
+};
+
+static const vec2<int> NO_CLICKPOS = {-999, -999};
+
 class Mauzling {
 private:
     vec2<float> player_position;
@@ -53,7 +62,9 @@ private:
     int player_state;
     int iscript_ind;
     bool player_is_selected;
-    std::queue<PlayerOrder> incoming_orders;
+    std::vector<PlayerOrder> incoming_orders;
+    std::queue<AcceptedOrder> order_queue;
+    std::queue<float> turns_we_need_to_do;
 
     int get_turn_delay(float d_angle) {
         d_angle = std::abs(d_angle);
@@ -63,13 +74,13 @@ private:
         return static_cast<int>(d_angle / TURN_SPEED);
     }
 
-    std::queue<float> get_turn_angles(const vec2<float>& start_position, const vec2<float>& goal_position, float start_angle) {
+    std::queue<float> get_turn_angles(const vec2<float>& start_position, const vec2<float>& goal_position, float start_angle, const vec2<int> clickpos = NO_CLICKPOS) {
         vec2<float> dv = goal_position - start_position;
         float g_ang = angle_clamp(-std::atan2(dv.y, dv.x) * RADIAN_SCALAR);
         float d_ang = angle_clamp(g_ang - start_angle);
         if (d_ang > 180.0f)
             d_ang -= 360.0f;
-        bool is_clockwise = d_ang > 0;
+        bool is_clockwise = d_ang < 0;
 
         // TODO: reimplement clicking-against-wall logic
 
@@ -110,12 +121,14 @@ private:
 public:
     Mauzling(const vec2<float>& pos, std::string image_filename) :
         player_position(pos),
-        player_angle(angle_clamp(45.0f)),
+        player_angle(angle_clamp(0.0f)),
         player_radius(PLAYER_RADIUS),
         player_state(0),
         iscript_ind(0),
-        player_is_selected(true),
-        incoming_orders() {
+        player_is_selected(false),
+        incoming_orders(),
+        order_queue(),
+        turns_we_need_to_do() {
 
         // placeholder graphic
         surface_debug = IMG_Load(image_filename.c_str());
@@ -171,7 +184,101 @@ public:
     }
 
     void tick() {
+        if (player_state == PlayerState::IDLE || player_state == PlayerState::DELAY_Q)
+            reset_iscript();
+        if (player_state == PlayerState::ARRIVED)
+            player_state = PlayerState::IDLE;
         //
+        // decrement delay on incoming orders. if any are ready add them to queue
+        //
+        for (size_t i = 0; i < incoming_orders.size(); ++i) {
+            incoming_orders[i].current_delay -= 1;
+            if (incoming_orders[i].current_delay <= 0) {
+                AcceptedOrder accepted_order = {incoming_orders[i].coordinates, 0, true, NO_CLICKPOS};
+                // for shift-clicks delay will be QUEUE_DELAY, for subpaths of a larger path it will be 0
+                if (incoming_orders[i].is_queue && !order_queue.empty())
+                    accepted_order.accept_delay = QUEUE_DELAY;
+                order_queue.push(accepted_order);
+            }
+        }
+        incoming_orders.erase(std::remove_if(incoming_orders.begin(), incoming_orders.end(), [](PlayerOrder n) { return n.current_delay <= 0; }), incoming_orders.end());
+        //
+        // act out our current order if we have one
+        //
+        if (!order_queue.empty()) {
+            order_queue.front().accept_delay -= 1;
+            if (order_queue.front().accept_delay > -1)
+                player_state = PlayerState::DELAY_Q;
+            else {
+                // order accepted, pathfind subpaths if this is a new command
+                bool pathfind_success = true;
+                if (order_queue.front().request_new_paths) {
+                    pathfind_success = false;
+                    vec2<int> clicked_pos = order_queue.front().goal_coordinates;
+                    //std::vector<vec2<int>> waypoints = pathfind(); // TODO: REIMPLEMENT PATHFINDING
+                    std::vector<vec2<int>> waypoints = {order_queue.front().goal_coordinates};
+                    if (!waypoints.empty()) {
+                        pathfind_success = true;
+                        vec2<float> dv = vec2<float>(waypoints[0]) - player_position;
+                        // if we're already at the destination then we just need to turn
+                        if (dv.length() < 0.01f) {
+                            turns_we_need_to_do = get_turn_angles(player_position, order_queue.front().goal_coordinates, player_angle);
+                            order_queue.front() = {player_position, -2, false, NO_CLICKPOS}; // why was this -2 and not -1 ?
+                        }
+                        // otherwise assign all the subpaths as new move orders
+                        else {
+                            order_queue.pop();
+                            // prepend waypoints to order_queue
+                            std::queue<AcceptedOrder> new_queue;
+                            for (const auto& waypoint : waypoints)
+                                new_queue.push({waypoint, 0, false, clicked_pos});
+                            std::queue<AcceptedOrder> temp_queue = order_queue;
+                            while (!temp_queue.empty()) {
+                                new_queue.push(temp_queue.front());
+                                temp_queue.pop();
+                            }
+                            order_queue = new_queue;
+                            order_queue.front().accept_delay = -1; // so we process the first subpath immediately
+                        }
+                    }
+                }
+                // abandon this order if no path was returned
+                if (!pathfind_success) {
+                    order_queue.pop();
+                    player_state = PlayerState::ARRIVED;
+                }
+                else {
+                    // lets compute necessary turns before we can begin moving
+                    if (order_queue.front().accept_delay == -1)
+                        turns_we_need_to_do = get_turn_angles(player_position, order_queue.front().goal_coordinates, player_angle, order_queue.front().clicked_coordinates);
+                    // do the actual turning
+                    if (!turns_we_need_to_do.empty()) {
+                        player_state = PlayerState::TURNING;
+                        player_angle = angle_clamp(turns_we_need_to_do.front());
+                        turns_we_need_to_do.pop();
+                        if (turns_we_need_to_do.empty())
+                            player_state = PlayerState::MOVING;
+                        else
+                            increment_iscript();
+                    }
+                    // move if we're now ready
+                    if (player_state == PlayerState::MOVING) {
+                        vec2<float> fgoal = vec2<float>(order_queue.front().goal_coordinates);
+                        vec2<float> dv = fgoal - player_position;
+                        float dv_length = dv.length();
+                        float move_amount = get_current_speed();
+                        if (dv_length <= move_amount) {
+                            player_position = fgoal;
+                            order_queue.pop();
+                            player_state = PlayerState::ARRIVED;
+                        }
+                        else
+                            player_position += (move_amount / dv_length) * dv;
+                        increment_iscript();
+                    }
+                }
+            }
+        }
     }
 
     // returns true if a cursor flash should be drawn
@@ -204,7 +311,7 @@ public:
                 return true;
         }
         // append order to queue
-        incoming_orders.push({order_coordinates, MOVE_DELAY, move_is_queue});
+        incoming_orders.push_back({order_coordinates, MOVE_DELAY, move_is_queue});
         if (player_state == PlayerState::IDLE)
             player_state = PlayerState::DELAY;
         return true;
