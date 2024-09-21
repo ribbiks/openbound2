@@ -4,19 +4,14 @@
 #include <unordered_map>
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 
+#include "misc_gfx.h"
 #include "globals.h"
 
 Font::Font(const std::string& path, SDL_Color color, int scalar)
     : spacing(scalar), char_height(0) {
 
-    SDL_Surface* font_img = IMG_Load(path.c_str());
-    if (!font_img) {
-        const char* error = IMG_GetError();
-        printf("Failed to load font image: %s %s\n", path.c_str(), error);
-        return;
-    }
+    SDL_Surface* font_img = load_image(path);
 
     // recolor
     SDL_LockSurface(font_img);

@@ -1,10 +1,10 @@
 #pragma once
+#include <algorithm>
 #include <array>
 #include <string>
 #include <queue>
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 
 #include "geometry.h"
 #include "globals.h"
@@ -131,12 +131,7 @@ public:
         turns_we_need_to_do() {
 
         // placeholder graphic
-        surface_debug = IMG_Load(image_filename.c_str());
-        if (surface_debug == nullptr) {
-            SDL_Log("Unable to load image %s! SDL_image Error: %s\n", image_filename.c_str(), IMG_GetError());
-            return;
-        }
-        SDL_SetColorKey(surface_debug, SDL_TRUE, SDL_MapRGB(surface_debug->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
+        surface_debug = load_image(image_filename);
 
         // selection ellipse graphic
         int ellipse_width = 2 * player_radius + 5;
@@ -147,6 +142,8 @@ public:
     ~Mauzling() {
         if (surface_debug)
             SDL_FreeSurface(surface_debug);
+        if (surface_ellipse)
+            SDL_FreeSurface(surface_ellipse);
     }
 
     void update_position(const vec2<float>& pos) {
@@ -198,6 +195,8 @@ public:
                 // for shift-clicks delay will be QUEUE_DELAY, for subpaths of a larger path it will be 0
                 if (incoming_orders[i].is_queue && !order_queue.empty())
                     accepted_order.accept_delay = QUEUE_DELAY;
+                else
+                    order_queue = std::queue<AcceptedOrder>();
                 order_queue.push(accepted_order);
             }
         }

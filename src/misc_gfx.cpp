@@ -1,4 +1,35 @@
+#include <cmath>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+
+#include "geometry.h"
+#include "globals.h"
 #include "misc_gfx.h"
+
+SDL_Surface* load_image(std::string image_filename) {
+    SDL_Surface* surface = IMG_Load(image_filename.c_str());
+    if (surface == nullptr) {
+        SDL_Log("Unable to load image %s! SDL_image Error: %s\n", image_filename.c_str(), IMG_GetError());
+        return nullptr;
+    }
+    SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
+    return surface;
+}
+
+SDL_Surface* rescale_surface(SDL_Surface* src, int new_width, int new_height) {
+    if (!src)
+        return nullptr;
+    SDL_Surface* dest = SDL_CreateRGBSurface(0, new_width, new_height, src->format->BitsPerPixel, src->format->Rmask, src->format->Gmask, src->format->Bmask, src->format->Amask);
+    if (!dest)
+        return nullptr;
+    SDL_Rect src_rect = {0, 0, src->w, src->h};
+    SDL_Rect dst_rect = {0, 0, new_width, new_height};
+    if (SDL_BlitScaled(src, &src_rect, dest, &dst_rect) != 0) {
+        SDL_FreeSurface(dest);
+        return nullptr;
+    }
+    return dest;
+}
 
 void draw_line(const Line& line, SDL_Color color) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);

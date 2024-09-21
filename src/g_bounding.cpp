@@ -2,6 +2,7 @@
 #include "g_game.h"
 
 #include "globals.h"
+#include "misc_gfx.h"
 #include "Vec2.h"
 
 G_Bounding::G_Bounding(Game* game, const std::string& map_filename) {
@@ -16,9 +17,11 @@ G_Bounding::G_Bounding(Game* game, const std::string& map_filename) {
 G_Bounding::~G_Bounding() {
     delete world_map;
     delete player;
+    delete cursor;
     delete most_recent_order;
     world_map = nullptr;
     player = nullptr;
+    cursor = nullptr;
     most_recent_order = nullptr;
 }
 
