@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "Array2D.h"
 #include "pathfinding.h"

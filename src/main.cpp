@@ -3,7 +3,7 @@
 #endif
 
 #include <memory>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <fmt/format.h>
 
 #include "Font.h"

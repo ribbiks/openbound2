@@ -4,7 +4,7 @@
 #include <string>
 #include <queue>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "geometry.h"
 #include "globals.h"

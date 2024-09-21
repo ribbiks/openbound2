@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 struct player_inputs {
     int mouse_x;

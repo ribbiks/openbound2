@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 static const std::string character_order = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-,:+\'!?0123456789()/_=\\[]*\"<>>;|";
 

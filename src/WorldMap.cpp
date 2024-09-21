@@ -4,7 +4,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include <SDL2/SDL.h>
 #include <nlohmann/json.hpp>
 
 #include "Array2D.h"

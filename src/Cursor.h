@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "globals.h"
 #include "misc_gfx.h"
