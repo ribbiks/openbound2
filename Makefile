@@ -1,9 +1,23 @@
+# detect platform (for native)
+ifeq ($(OS),Windows_NT)
+    PLATFORM := windows
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+        PLATFORM := linux
+    endif
+    ifeq ($(UNAME_S),Darwin)
+        PLATFORM := mac
+    endif
+endif
+LIB_PATH := lib/$(PLATFORM)
+
 # compilers and flags
 CXX := g++
 EMXX := emcc
 CXXFLAGS := -std=c++11 -O2 -Wall -Wextra $(shell sdl2-config --cflags) $(shell pkg-config --cflags SDL2_image) -Ithird-party
-EMXXFLAGS := -std=c++11 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='["png"]' --preload-file assets --preload-file maps -Ithird-party -lfmt -Llib_wasm
-LDFLAGS := $(shell sdl2-config --libs) $(shell pkg-config --libs SDL2_image) -lfmt -Llib
+EMXXFLAGS := -std=c++11 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='["png"]' --preload-file assets --preload-file maps -Ithird-party -lfmt -Llib/wasm
+LDFLAGS := $(shell sdl2-config --libs) $(shell pkg-config --libs SDL2_image) -lfmt -L$(LIB_PATH)
 
 # include and library directories
 SRC_DIR := src
