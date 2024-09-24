@@ -9,6 +9,9 @@ G_Bounding::G_Bounding(Game* game, const std::string& map_filename) {
     world_map = new WorldMap(map_filename);
     vec2<int> mapsize = world_map->get_map_size();
     player = new Mauzling(world_map->get_start_pos(), "assets/sq16.png");
+    cursor = new Cursor({"assets/cursor_0.png", "assets/cursor_1.png", "assets/cursor_2.png", "assets/cursor_3.png", "assets/cursor_4.png"},
+                        "assets/cursor_click.png",
+                        "assets/cursor_shiftclick.png");
     //
     game->reset_camera_pos({0,0}); // change to start player coordinates?
     game->set_camera_bounds({0, mapsize.x}, {0, mapsize.y});
