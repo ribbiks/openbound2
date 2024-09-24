@@ -324,7 +324,7 @@ public:
                 return;
             }
             // fiddle with these numbers until it's aligned properly
-            SDL_Rect rect = {static_cast<int>(player_position.x - player_radius - 1 - offset.x),
+            SDL_Rect rect = {static_cast<int>(player_position.x - player_radius - 2 - offset.x),
                              static_cast<int>(player_position.y + 2 - offset.y),
                              surface_ellipse->w,
                              surface_ellipse->h};
@@ -343,6 +343,8 @@ public:
                              static_cast<int>(player_radius * 2)};
             SDL_RenderCopyEx(renderer, texture, nullptr, &rect, -player_angle, nullptr, SDL_FLIP_NONE);
             SDL_DestroyTexture(texture);
+            //
+            draw_rect(rect, UNIT_HITBOX);
         }
     }
 };

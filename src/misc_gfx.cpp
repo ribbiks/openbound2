@@ -37,8 +37,11 @@ void draw_line(const Line& line, SDL_Color color) {
 }
 
 void draw_rect(const Rect& rect, SDL_Color color, bool filled) {
+    draw_rect({rect.position.x, rect.position.y, rect.size.x, rect.size.y}, color, filled);
+}
+
+void draw_rect(const SDL_Rect& sdl_rect, SDL_Color color, bool filled) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-    SDL_Rect sdl_rect = {rect.position.x, rect.position.y, rect.size.x, rect.size.y};
     if (filled)
         SDL_RenderFillRect(renderer, &sdl_rect);
     else

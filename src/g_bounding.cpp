@@ -9,6 +9,7 @@ G_Bounding::G_Bounding(Game* game, const std::string& map_filename) {
     world_map = new WorldMap(map_filename);
     vec2<int> mapsize = world_map->get_map_size();
     player = new Mauzling(world_map->get_start_pos(), "assets/sq16.png");
+    //
     cursor = new Cursor({"assets/cursor_0.png", "assets/cursor_1.png", "assets/cursor_2.png", "assets/cursor_3.png", "assets/cursor_4.png"},
                         "assets/cursor_click.png",
                         "assets/cursor_shiftclick.png");
@@ -33,8 +34,8 @@ void G_Bounding::update(Game* game, player_inputs* inputs, double frame_time) {
     // player selection and orders
     //
     vec2<int> camera_pos = game->get_camera_pos();
-    vec2<int> mouse_pos = {inputs->mouse_x, inputs->mouse_y};
-    mouse_pos += camera_pos;
+    mouse_pos_screen = {inputs->mouse_x, inputs->mouse_y};
+    vec2<int> mouse_pos = mouse_pos_screen + camera_pos;
     if (!drawing_box && inputs->leftmouse_down) {
         selection_box.position = mouse_pos;
         drawing_box = true;
@@ -64,10 +65,9 @@ void G_Bounding::update(Game* game, player_inputs* inputs, double frame_time) {
 
 void G_Bounding::tick(Game* game, player_inputs* inputs) {
     vec2<int> camera_pos = game->get_camera_pos();
-    vec2<int> mouse_pos = {inputs->mouse_x, inputs->mouse_y};
-    mouse_pos += camera_pos;
     //
     world_map->tick();
+    cursor->tick();
     //
     // issue order
     //
@@ -87,4 +87,5 @@ void G_Bounding::draw(Game* game) {
         Rect offset_box = {selection_box.position - camera_pos, selection_box.size};
         draw_rect(offset_box, SELECTION_BOX_COL);
     }
+    cursor->draw(mouse_pos_screen.x, mouse_pos_screen.y);
 }

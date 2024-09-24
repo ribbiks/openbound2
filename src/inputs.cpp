@@ -13,10 +13,17 @@ void get_inputs(player_inputs* inputs) {
     inputs->rightmouse_up = false;
     inputs->quit = false;
     while (SDL_PollEvent(&e) != 0) {
-        if (e.type == SDL_QUIT) {
+        //
+        if (e.type == SDL_QUIT)
             inputs->quit = true;
-        }
-        if (e.type == SDL_MOUSEBUTTONDOWN) {
+        //
+        else if (e.type == SDL_MOUSEMOTION && e.motion.windowID == SDL_GetWindowID(window))
+            SDL_ShowCursor(SDL_DISABLE);
+        //
+        else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_LEAVE)
+            SDL_ShowCursor(SDL_ENABLE);
+        //
+        else if (e.type == SDL_MOUSEBUTTONDOWN) {
             switch (e.button.button) {
                 case SDL_BUTTON_LEFT:
                     inputs->leftmouse_down = true;

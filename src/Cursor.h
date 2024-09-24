@@ -16,6 +16,8 @@ private:
     vec2<int> position;
     int frame_cursor;
     int frame_click;
+    int animation_speed_cursor = 3;
+    int animation_tick_cursor = 0;
     std::vector<SDL_Surface*> surfaces_cursor;
     std::vector<SDL_Surface*> surfaces_click;
     std::vector<SDL_Surface*> surfaces_shiftclick;
@@ -50,10 +52,21 @@ public:
     }
 
     void tick() {
-        //
+        animation_tick_cursor += 1;
+        if (animation_tick_cursor >= animation_speed_cursor) {
+            frame_cursor = (frame_cursor + 1) % surfaces_cursor.size();
+            animation_tick_cursor = 0;
+        }
     }
 
-    void draw() {
-        //
+    void draw(int mouse_x, int mouse_y) {
+        SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surfaces_cursor[frame_cursor]);
+        if (texture == nullptr) {
+            SDL_Log("Unable to create texture! SDL Error: %s\n", SDL_GetError());
+            return;
+        }
+        SDL_Rect rect = {mouse_x - 1, mouse_y - 1, surfaces_cursor[frame_cursor]->w, surfaces_cursor[frame_cursor]->h};
+        SDL_RenderCopy(renderer, texture, nullptr, &rect);
+        SDL_DestroyTexture(texture);
     }
 };

@@ -2,6 +2,8 @@
 
 #include <SDL.h>
 
+extern SDL_Window* window;
+
 struct player_inputs {
     int mouse_x;
     int mouse_y;
