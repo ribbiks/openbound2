@@ -6,8 +6,9 @@
 #include "misc_gfx.h"
 #include "globals.h"
 
-Font::Font(const std::string& path, SDL_Color color, int scalar)
-    : spacing(scalar), char_height(0) {
+Font::Font(const std::string& path, SDL_Color color, int scalar) :
+    spacing(scalar),
+    char_height(0) {
 
     SDL_Surface* font_img = load_image(path);
 
@@ -64,15 +65,13 @@ Font::Font(const std::string& path, SDL_Color color, int scalar)
 }
 
 Font::~Font() {
-    for (auto& pair : characters) {
+    for (auto& pair : characters)
         SDL_FreeSurface(pair.second);
-    }
 }
 
 SDL_Surface* Font::render_text(const std::string& text) {
-    if (text.empty()) {
+    if (text.empty())
         return nullptr;
-    }
 
     // calculate the total width of the text surface
     int total_width = 0;
@@ -87,9 +86,8 @@ SDL_Surface* Font::render_text(const std::string& text) {
 
     // create a surface to hold the entire text
     SDL_Surface* text_surface = SDL_CreateRGBSurface(0, total_width, char_height, 32, 0, 0, 0, 0);
-    if (!text_surface) {
+    if (!text_surface)
         return nullptr;
-    }
     SDL_Rect floodfill = {0, 0, text_surface->w, text_surface->h};
     SDL_FillRect(text_surface, &floodfill, SDL_MapRGB(text_surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
     SDL_SetColorKey(text_surface, SDL_TRUE, SDL_MapRGB(text_surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));

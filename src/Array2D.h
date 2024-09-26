@@ -1,7 +1,6 @@
 #pragma once
-
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 template <typename T>
 class Array2D {

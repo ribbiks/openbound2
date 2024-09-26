@@ -19,6 +19,7 @@ bool quit = false;
 std::unique_ptr<Game> game;
 
 Font* fps_font = nullptr;
+
 Uint32 frame_count, frame_time, prev_time = 0;
 float fps = 0.0f;
 double current_time = 0.0;
@@ -27,7 +28,6 @@ double previous_update_time = 0.0;
 int current_tic = 0;
 
 player_inputs* inputs = nullptr;
-player_inputs* previous_inputs = nullptr;
 
 void update_fps() {
     frame_count++;
@@ -45,6 +45,18 @@ void main_loop() {
     current_time = new_time;
     accumulator = std::min(accumulator + frame_time, MAX_ACCUM);
 
+    // DEBUGGING STUFF
+    if (current_tic == 20) {
+        game->animation_manager->add_animation("cursor_loop",
+                                              {"assets/cursor_0.png",
+                                               "assets/cursor_1.png",
+                                               "assets/cursor_2.png",
+                                               "assets/cursor_3.png",
+                                               "assets/cursor_4.png"},
+                                               {10,5,10,5,20});
+        game->animation_manager->start_new_animation("cursor_loop", "anim_id_1", {256,256}, true);
+    }
+
     // updates that occur every frame (camera, mouse cursors)
     update_fps();
     get_inputs(inputs);
@@ -59,8 +71,6 @@ void main_loop() {
         //
         game->tick(inputs);
         //
-        delete previous_inputs;
-        previous_inputs = new player_inputs(*inputs);
         previous_update_time = current_time;
         accumulator -= DT;
         current_tic++;

@@ -2,7 +2,6 @@
 
 #include "g_gamestate.h"
 
-#include "Cursor.h"
 #include "geometry.h"
 #include "Mauzling.h"
 #include "WorldMap.h"
@@ -14,8 +13,6 @@ class G_Bounding : public GameState {
 private:
     WorldMap* world_map = nullptr;
     Mauzling* player = nullptr;
-    Cursor* cursor = nullptr;
-    vec2<int> mouse_pos_screen;
     bool drawing_box = false;
     Rect selection_box = {{0,0}, {0,0}};
     bool rightmouse_was_up = true;

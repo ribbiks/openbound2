@@ -51,6 +51,14 @@ public:
                 SDL_FreeSurface(surfaces_click[i]);
     }
 
+    vec2<int> get_pos() {
+        return position;
+    }
+
+    void update(const vec2<int>& new_position) {
+        position = new_position;
+    }
+
     void tick() {
         animation_tick_cursor += 1;
         if (animation_tick_cursor >= animation_speed_cursor) {
@@ -59,13 +67,13 @@ public:
         }
     }
 
-    void draw(int mouse_x, int mouse_y) {
+    void draw() {
         SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surfaces_cursor[frame_cursor]);
         if (texture == nullptr) {
             SDL_Log("Unable to create texture! SDL Error: %s\n", SDL_GetError());
             return;
         }
-        SDL_Rect rect = {mouse_x - 1, mouse_y - 1, surfaces_cursor[frame_cursor]->w, surfaces_cursor[frame_cursor]->h};
+        SDL_Rect rect = {position.x - 1, position.y - 1, surfaces_cursor[frame_cursor]->w, surfaces_cursor[frame_cursor]->h};
         SDL_RenderCopy(renderer, texture, nullptr, &rect);
         SDL_DestroyTexture(texture);
     }
