@@ -67,6 +67,11 @@ vec2<int> Game::get_cursor_pos() {
     return {0,0};
 }
 
+void Game::cursor_click_animation(bool is_queue) {
+    if (cursor != nullptr)
+        cursor->start_click_animation(is_queue);
+}
+
 void Game::reset_camera_pos(const vec2<float>& target_pos) {
     if (camera != nullptr)
         camera->reset(target_pos);

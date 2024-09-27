@@ -65,10 +65,13 @@ void G_Bounding::tick(Game* game, player_inputs* inputs) {
     //
     if (most_recent_order != nullptr) {
         bool animate_cursor = player->issue_new_order(most_recent_order->coordinates, most_recent_order->is_queue);
+        if (animate_cursor)
+            game->cursor_click_animation(most_recent_order->is_queue);
         delete most_recent_order;
         most_recent_order = nullptr;
     }
     player->tick();
+
 }
 
 void G_Bounding::draw(Game* game) {

@@ -27,6 +27,7 @@ public:
     vec2<int> get_camera_pos();
     vec2<int> get_camera_target();
     vec2<int> get_cursor_pos();
+    void cursor_click_animation(bool is_queue);
     void reset_camera_pos(const vec2<float>& target_pos);
     void set_camera_bounds(const vec2<int>& xrange, const vec2<int>& yrange);
 };
