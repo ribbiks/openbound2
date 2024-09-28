@@ -10,6 +10,7 @@
 #include "globals.h"
 #include "misc_gfx.h"
 #include "Vec2.h"
+#include "WorldMap.h"
 
 extern SDL_Renderer* renderer;
 
@@ -180,7 +181,7 @@ public:
         }
     }
 
-    void tick() {
+    void tick(WorldMap* world_map) {
         if (player_state == PlayerState::IDLE || player_state == PlayerState::DELAY_Q)
             reset_iscript();
         if (player_state == PlayerState::ARRIVED)
@@ -214,8 +215,7 @@ public:
                 if (order_queue.front().request_new_paths) {
                     pathfind_success = false;
                     vec2<int> clicked_pos = order_queue.front().goal_coordinates;
-                    //std::vector<vec2<int>> waypoints = pathfind(); // TODO: REIMPLEMENT PATHFINDING
-                    std::vector<vec2<int>> waypoints = {order_queue.front().goal_coordinates};
+                    std::vector<vec2<int>> waypoints = world_map->pathfind(player_position, order_queue.front().goal_coordinates);
                     if (!waypoints.empty()) {
                         pathfind_success = true;
                         vec2<float> dv = vec2<float>(waypoints[0]) - player_position;

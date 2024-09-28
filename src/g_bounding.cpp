@@ -70,7 +70,7 @@ void G_Bounding::tick(Game* game, player_inputs* inputs) {
         delete most_recent_order;
         most_recent_order = nullptr;
     }
-    player->tick();
+    player->tick(world_map);
 
 }
 

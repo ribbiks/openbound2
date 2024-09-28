@@ -19,6 +19,7 @@ public:
     WorldMap(const std::string& map_filename);
     vec2<int> get_map_size();
     vec2<int> get_start_pos();
+    std::vector<vec2<int>> pathfind(vec2<int> start_pos, vec2<int> end_pos);
     void tick();
     void draw(const vec2<int>& offset);
 };
