@@ -8,38 +8,38 @@ AnimationManager::AnimationManager() : all_animations(), active_animations() {}
 
 AnimationManager::~AnimationManager() {
     for (auto& pair : all_animations) {
-    	for (size_t i = 0; i < pair.second.frames.size(); ++i)
-    		SDL_FreeSurface(pair.second.frames[i]);
-	}
+        for (size_t i = 0; i < pair.second.frames.size(); ++i)
+            SDL_FreeSurface(pair.second.frames[i]);
+    }
 }
 
 void AnimationManager::add_animation(std::string name, std::vector<std::string> image_list, std::vector<int> frames_per_image) {
-	if (frames_per_image.size() > 0 && frames_per_image.size() != image_list.size())
+    if (frames_per_image.size() > 0 && frames_per_image.size() != image_list.size())
         throw std::invalid_argument("image_list size does not match frames_per_image size");
-	animation_sequence anim_dat;
-	for (size_t i = 0; i < image_list.size(); ++i) {
-		anim_dat.frames.push_back(load_image(image_list[i]));
-		if (frames_per_image.size() > 0)
-			anim_dat.durations.push_back(frames_per_image[i]);
-		else
-			anim_dat.durations.push_back(1);
-		anim_dat.offsets.push_back({0,0}); // TODO: add support for offsets
-	}
-	all_animations[name] = anim_dat;
+    animation_sequence anim_dat;
+    for (size_t i = 0; i < image_list.size(); ++i) {
+        anim_dat.frames.push_back(load_image(image_list[i]));
+        if (frames_per_image.size() > 0)
+            anim_dat.durations.push_back(frames_per_image[i]);
+        else
+            anim_dat.durations.push_back(1);
+        anim_dat.offsets.push_back({0,0}); // TODO: add support for offsets
+    }
+    all_animations[name] = anim_dat;
 }
 
 void AnimationManager::start_new_animation(std::string name, std::string id, vec2<int> position, bool is_looping) {
     if (all_animations.count(name) == 0)
         throw std::invalid_argument("all_animations does not contain image with name " + name);
-	active_animations[id] = {name, position, 0, 0, is_looping};
+    active_animations[id] = {name, position, 0, 0, is_looping};
 }
 
 void AnimationManager::remove_animation(std::string id) {
-	active_animations.erase(id);
+    active_animations.erase(id);
 }
 
 void AnimationManager::remove_all_animations() {
-	active_animations.clear();
+    active_animations.clear();
 }
 
 void AnimationManager::tick() {

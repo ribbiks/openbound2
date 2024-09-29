@@ -215,7 +215,12 @@ public:
                 if (order_queue.front().request_new_paths) {
                     pathfind_success = false;
                     vec2<int> clicked_pos = order_queue.front().goal_coordinates;
+                    //
+                    double start_time = SDL_GetTicks() / 1000.0;
                     std::vector<vec2<int>> waypoints = world_map->pathfind(player_position, order_queue.front().goal_coordinates);
+                    double end_time = SDL_GetTicks() / 1000.0 - start_time;
+                    printf("pathfinding completed in %f seconds\n", end_time);
+                    //
                     if (!waypoints.empty()) {
                         pathfind_success = true;
                         vec2<float> dv = vec2<float>(waypoints[0]) - player_position;

@@ -79,6 +79,14 @@ bool line_contains_line(const Line& line1, const Line& line2) {
            point_is_on_line_segment(line2.end, line1);
 }
 
+int value_clamp(int v, int v_min, int v_max) {
+    return std::min(std::max(v, v_min), v_max);
+}
+
+float value_clamp(float v, float v_min, float v_max) {
+    return std::min(std::max(v, v_min), v_max);
+}
+
 float angle_clamp(float angle) {
     return std::fmod(std::fmod(angle, 360.0f) + 360.0f, 360.0f);
 }

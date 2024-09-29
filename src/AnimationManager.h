@@ -17,10 +17,10 @@ struct animation_sequence {
 
 struct active_animation {
     std::string name;
-	vec2<int> position;
-	unsigned int current_frame;
-	unsigned int current_tick_within_frame;
-	bool is_looping;
+    vec2<int> position;
+    unsigned int current_frame;
+    unsigned int current_tick_within_frame;
+    bool is_looping;
 };
 
 class AnimationManager {

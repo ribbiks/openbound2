@@ -10,10 +10,13 @@ const double MAX_ACCUM = MAX_UPDATE_FRAMES / TICRATE;
 
 const vec2<int> RESOLUTION = {960, 540};
 const int GRIDSIZE = 16;
+const float F_GRIDSIZE = static_cast<float>(GRIDSIZE);
+
+const float EPSILON = 0.0001f;
 
 // how much smaller is the player than a single GRIDSIZE?
 const float PLAYER_RADIUS_EPSILON = 0.01f;
-const float PLAYER_RADIUS = static_cast<double>(GRIDSIZE) / 2;
+const float PLAYER_RADIUS = F_GRIDSIZE / 2.0f;
 
 const float RADIAN_SCALAR = 57.2957795; // 180 / pi
 const float ANGLE_SCALAR  = 0.01745329; // pi / 180

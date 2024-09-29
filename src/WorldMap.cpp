@@ -58,11 +58,11 @@ vec2<int> WorldMap::get_start_pos() {
     return GRIDSIZE * player_start + vec2<int>({GRIDSIZE/2, GRIDSIZE/2});
 }
 
-std::vector<vec2<int>> WorldMap::pathfind(vec2<int> start_pos, vec2<int> end_pos) {
-    // TODO!!!!!
-    std::vector<vec2<int>> waypoints;
-    waypoints.push_back(end_pos);
-    return waypoints;
+std::vector<vec2<int>> WorldMap::pathfind(const vec2<int>& start_pos, const vec2<int>& end_pos) {
+    vec2<int> map_size = get_map_size() - vec2<int>(1,1);
+    vec2<int> start_pos_bounded = {value_clamp(start_pos.x, 0, map_size.x), value_clamp(start_pos.y, 0, map_size.y)};
+    vec2<int> end_pos_bounded = {value_clamp(end_pos.x, 0, map_size.x), value_clamp(end_pos.y, 0, map_size.y)};
+    return get_pathfinding_waypoints(start_pos_bounded, end_pos_bounded, pf_data, wall_dat);
 }
 
 void WorldMap::tick() {

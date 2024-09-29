@@ -81,6 +81,7 @@ void G_Bounding::draw(Game* game) {
     game->animation_manager->draw(camera_pos); // draw sprites on top of player, but not on top of selection box
     if (drawing_box) {
         Rect offset_box = {selection_box.position - camera_pos, selection_box.size};
-        draw_rect(offset_box, SELECTION_BOX_COL);
+        //draw_rect(offset_box, SELECTION_BOX_COL);
+        draw_thick_rect(offset_box, SELECTION_BOX_COL, 2);
     }
 }

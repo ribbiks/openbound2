@@ -36,6 +36,31 @@ void draw_line(const Line& line, SDL_Color color) {
     SDL_RenderDrawLine(renderer, line.start.x, line.start.y, line.end.x, line.end.y);
 }
 
+void draw_thick_line(const Line& line, SDL_Color color, int thickness) {
+    int dx = line.end.x - line.start.x;
+    int dy = line.end.y - line.start.y;
+    double length = std::sqrt(dx * dx + dy * dy);
+    if (length < EPSILON)
+        return;
+
+    double unitX = dx / length;
+    double unitY = dy / length;
+    double perpX = -unitY;
+    double perpY = unitX;
+
+    std::vector<SDL_Point> points;
+    for (int i = -thickness / 2; i < (thickness + 1) / 2; ++i) {
+        int offsetX = static_cast<int>(std::round(i * perpX));
+        int offsetY = static_cast<int>(std::round(i * perpY));
+        SDL_Point start_point = {line.start.x + offsetX, line.start.y + offsetY};
+        SDL_Point end_point = {line.end.x + offsetX, line.end.y + offsetY};
+        points.push_back(start_point);
+        points.push_back(end_point);
+    }
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    SDL_RenderDrawLines(renderer, points.data(), points.size());
+}
+
 void draw_rect(const Rect& rect, SDL_Color color, bool filled) {
     draw_rect({rect.position.x, rect.position.y, rect.size.x, rect.size.y}, color, filled);
 }
@@ -46,6 +71,21 @@ void draw_rect(const SDL_Rect& sdl_rect, SDL_Color color, bool filled) {
         SDL_RenderFillRect(renderer, &sdl_rect);
     else
         SDL_RenderDrawRect(renderer, &sdl_rect);
+}
+
+void draw_thick_rect(const Rect& rect, SDL_Color color, int thickness) {
+    Line line1 = {rect.position,
+                  rect.position + vec2<int>(rect.size.x, 0)};
+    Line line2 = {rect.position + vec2<int>(rect.size.x, 0),
+                  rect.position + rect.size};
+    Line line3 = {rect.position + rect.size,
+                  rect.position + vec2<int>(0, rect.size.y)};
+    Line line4 = {rect.position + vec2<int>(0, rect.size.y),
+                  rect.position};
+    draw_thick_line(line1, color, thickness);
+    draw_thick_line(line2, color, thickness);
+    draw_thick_line(line3, color, thickness);
+    draw_thick_line(line4, color, thickness);
 }
 
 void draw_background_grid(const vec2<int>& offset) {
@@ -73,6 +113,7 @@ void draw_text(const std::string& text, int x, int y, Font* font) {
         return;
     }
     SDL_Surface* surface = font->render_text(text);
+    SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_Rect fps_rect = {x, y, surface->w, surface->h};
     SDL_RenderCopy(renderer, texture, nullptr, &fps_rect);

@@ -1,15 +1,20 @@
 #include "pathfinding.h"
 
-bool line_of_sight_unit(const vec2<int>& v1, const vec2<int>& v2, const Array2D<bool>& wall_dat) {
+#include <algorithm>
+#include <queue>
+
+#include "globals.h"
+
+bool line_of_sight_unit(const vec2<float>& v1, const vec2<float>& v2, const Array2D<bool>& wall_dat) {
     const vec2<float> adj_list[] = {{PLAYER_RADIUS_EPSILON, PLAYER_RADIUS_EPSILON},
                                     {1.0f - PLAYER_RADIUS_EPSILON, PLAYER_RADIUS_EPSILON},
                                     {PLAYER_RADIUS_EPSILON, 1.0f - PLAYER_RADIUS_EPSILON},
                                     {1.0f - PLAYER_RADIUS_EPSILON, 1.0f - PLAYER_RADIUS_EPSILON}};
     for (const auto& adj : adj_list) {
-        float x1 = static_cast<float>(v1.x) + adj.x;
-        float y1 = static_cast<float>(v1.y) + adj.y;
-        float x2 = static_cast<float>(v2.x) + adj.x;
-        float y2 = static_cast<float>(v2.y) + adj.y;
+        float x1 = v1.x + adj.x;
+        float y1 = v1.y + adj.y;
+        float x2 = v2.x + adj.x;
+        float y2 = v2.y + adj.y;
         if (!line_of_sight(x1, y1, x2, y2, wall_dat))
             return false;
     }
@@ -145,8 +150,11 @@ PathfindingData get_pathfinding_data(const Array2D<bool>& wall_dat) {
     //
 
     std::vector<std::vector<Line>> edges;
+    std::vector<std::unordered_map<int, std::vector<int>>> graphs;
     for (int rid = 0; rid < num_regions; ++rid) {
         std::vector<Line> candidate_edges, filtered_edges;
+        std::vector<vec2<size_t>> node_ij;
+        std::unordered_map<int, std::vector<int>> graph;
         int filtcount1 = 0;
         int filtcount2 = 0;
         int filtcount3 = 0;
@@ -164,6 +172,7 @@ PathfindingData get_pathfinding_data(const Array2D<bool>& wall_dat) {
                         //
                         if (line_of_sight_unit(v1, v2, wall_dat)) {
                             candidate_edges.push_back({v1, v2});
+                            node_ij.push_back({i,j});
                         } else
                             filtcount3 += 1;
                     } else
@@ -180,15 +189,64 @@ PathfindingData get_pathfinding_data(const Array2D<bool>& wall_dat) {
                     break;
                 }
             }
-            if (!edge_contains_another_edge)
+            if (!edge_contains_another_edge) {
                 filtered_edges.push_back(candidate_edges[i]);
+                graph[node_ij[i].x].push_back(node_ij[i].y);
+                graph[node_ij[i].y].push_back(node_ij[i].x);
+            }
             else
                 filtcount4 += 1;
         }
         edges.push_back(filtered_edges);
+        graphs.push_back(graph);
         //
         printf("region: %i (%zu edges, %i + %i + %i + %i filtered)\n", rid, filtered_edges.size(), filtcount1, filtcount2, filtcount3, filtcount4);
     }
 
-    return {tile_2_region_id, num_regions, nodes, edges};
+    return {tile_2_region_id, num_regions, nodes, edges, graphs};
+}
+
+//
+// big complicated function that does the actual pathfinding logic
+//
+
+std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
+                                                 const vec2<int>& end_pos,
+                                                 const PathfindingData& pf_data,
+                                                 const Array2D<bool>& wall_dat) {
+    std::vector<vec2<int>> waypoints;
+
+    // check if we clicked in our current region
+    vec2<int> map_coords_start = {start_pos.x / GRIDSIZE, start_pos.y / GRIDSIZE}; // (ux,uy)
+    vec2<int> map_coords_end = {end_pos.x / GRIDSIZE, end_pos.y / GRIDSIZE};       // (cx,cy)
+    int start_region = pf_data.tile_2_region_id[map_coords_start.x][map_coords_start.y];
+    int end_region = pf_data.tile_2_region_id[map_coords_end.x][map_coords_end.y];
+    printf("(%i,%i), (%i,%i) %i %i\n", map_coords_start.x, map_coords_start.y, map_coords_end.x, map_coords_end.y, start_region, end_region);
+    if (start_region != end_region) {
+        // TODO: draw a line from end_pos to click_pos, looking for a valid destination tile along the way
+        return waypoints;
+    }
+
+    // TODO: weird stuff about nudging coordinates when clicking in a wall
+
+    // check for a straight line between start and end
+    vec2<float> fcoords_start = {static_cast<float>(start_pos.x) / F_GRIDSIZE,
+                                 static_cast<float>(start_pos.y) / F_GRIDSIZE};
+    vec2<float> fcoords_end = {static_cast<float>(end_pos.x) / F_GRIDSIZE,
+                               static_cast<float>(end_pos.y) / F_GRIDSIZE};
+    vec2<float> radius_adj = {PLAYER_RADIUS / F_GRIDSIZE, PLAYER_RADIUS / F_GRIDSIZE};
+    if (line_of_sight_unit(fcoords_start - radius_adj, fcoords_end - radius_adj, wall_dat)) {
+        waypoints.push_back(end_pos);
+        return waypoints;
+    }
+
+    // insert start position into graph
+    auto graph = pf_data.graphs[start_region];
+    int starting_node = graph.size();
+    int ending_node = graph.size() + 1;
+    // insert end position into graph
+    //
+    // astar
+    //
+    return waypoints;
 }

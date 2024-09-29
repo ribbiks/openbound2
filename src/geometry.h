@@ -29,6 +29,8 @@ bool points_are_collinear(const vec2<int>& a, const vec2<int>& b, const vec2<int
 bool point_is_on_line_segment(const vec2<int>& p, const Line& line);
 bool point_in_box(const vec2<float>& point, const FRect& box);
 bool line_contains_line(const Line& line1, const Line& line2);
+int value_clamp(int v, int v_min, int v_max);
+float value_clamp(float v, float v_min, float v_max);
 float angle_clamp(float angle);
 
 #define SIGN(x) (x > 0 ? 1 : (x < 0 ? -1 : 0))

@@ -38,8 +38,10 @@ Font::Font(const std::string& path, SDL_Color color, int scalar) :
         if (r == FONT_DELIM_COL.r && g == FONT_DELIM_COL.g && b == FONT_DELIM_COL.b) {
             SDL_Rect char_rect = {x - current_char_width, 0, current_char_width, font_img->h};
             SDL_Surface* char_surface = SDL_CreateRGBSurface(0, char_rect.w, char_rect.h, 32, 0, 0, 0, 0);
+            SDL_Rect floodfill = {0, 0, char_surface->w, char_surface->h};
+            SDL_FillRect(char_surface, &floodfill, SDL_MapRGB(char_surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
+            
             SDL_BlitSurface(font_img, &char_rect, char_surface, nullptr);
-
             if (scalar > 1) {
                 SDL_Surface* scaled_surface = SDL_CreateRGBSurface(0, char_rect.w * scalar, char_rect.h * scalar, 32, 0, 0, 0, 0);
                 SDL_BlitScaled(char_surface, nullptr, scaled_surface, nullptr);
@@ -90,7 +92,6 @@ SDL_Surface* Font::render_text(const std::string& text) {
         return nullptr;
     SDL_Rect floodfill = {0, 0, text_surface->w, text_surface->h};
     SDL_FillRect(text_surface, &floodfill, SDL_MapRGB(text_surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
-    SDL_SetColorKey(text_surface, SDL_TRUE, SDL_MapRGB(text_surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
 
     int current_x = 0;
     for (char c : text) {

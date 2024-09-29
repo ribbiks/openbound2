@@ -1,10 +1,7 @@
 #include "Camera.h"
 
+#include "geometry.h"
 #include "globals.h"
-
-static float value_clamp(float v, float v_min, float v_max) {
-    return std::min(std::max(v, v_min), v_max);
-}
 
 Camera::Camera() :
     pos(0.0f, 0.0f), 
@@ -47,9 +44,9 @@ void Camera::nudge_target(bool move_up, bool move_down, bool move_left, bool mov
 
 void Camera::set_bounds(const vec2<int>& xrange, const vec2<int>& yrange) {
     bounds[0] = static_cast<float>(xrange.x);
-    bounds[1] = static_cast<float>(xrange.y) - static_cast<float>(RESOLUTION.x);
+    bounds[1] = std::max(0.0f, static_cast<float>(xrange.y) - static_cast<float>(RESOLUTION.x));
     bounds[2] = static_cast<float>(yrange.x);
-    bounds[3] = static_cast<float>(yrange.y) - static_cast<float>(RESOLUTION.y);
+    bounds[3] = std::max(0.0f, static_cast<float>(yrange.y) - static_cast<float>(RESOLUTION.y));
     if (bounds[1] <= bounds[0])
         locked_x = true;
     if (bounds[3] <= bounds[2])
