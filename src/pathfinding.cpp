@@ -21,6 +21,20 @@ bool line_of_sight_unit(const vec2<float>& v1, const vec2<float>& v2, const Arra
     return true;
 }
 
+bool valid_player_position(const vec2<int>& position, const Array2D<bool>& wall_dat) {
+    const vec2<float> adj_list[] = {{-PLAYER_RADIUS, -PLAYER_RADIUS},
+                                    {-PLAYER_RADIUS,  PLAYER_RADIUS},
+                                    { PLAYER_RADIUS, -PLAYER_RADIUS},
+                                    { PLAYER_RADIUS,  PLAYER_RADIUS}};
+    for (const auto& adj : adj_list) {
+        vec2<int> v_adj = position + adj;
+        vec2<int> v_map = {v_adj.x / GRIDSIZE, v_adj.y / GRIDSIZE};
+        if (wall_dat[v_map.x][v_map.y])
+            return false;
+    }
+    return true;
+}
+
 bool edge_has_good_incoming_angles(const vec2<int>& v1, const vec2<int>& v2, int corner1, int corner2) {
     if (v1.x == v2.x || v1.y == v2.y)
         return true;
@@ -150,17 +164,19 @@ PathfindingData get_pathfinding_data(const Array2D<bool>& wall_dat) {
     //
 
     std::vector<std::vector<Line>> edges;
-    std::vector<std::unordered_map<int, std::vector<int>>> graphs;
+    std::vector<std::unordered_map<int, std::vector<GraphNode>>> graphs;
     for (int rid = 0; rid < num_regions; ++rid) {
         std::vector<Line> candidate_edges, filtered_edges;
-        std::vector<vec2<size_t>> node_ij;
-        std::unordered_map<int, std::vector<int>> graph;
+        std::vector<vec2<int>> node_ij;
+        std::vector<float> node_dists;
+        std::unordered_map<int, std::vector<GraphNode>> graph;
+        int num_nodes = nodes[rid].size();
         int filtcount1 = 0;
         int filtcount2 = 0;
         int filtcount3 = 0;
         int filtcount4 = 0;
-        for (size_t i = 0; i < nodes[rid].size(); ++i) {
-            for (size_t j = i+1; j < nodes[rid].size(); ++j) {
+        for (int i = 0; i < num_nodes; ++i) {
+            for (int j = i+1; j < num_nodes; ++j) {
                 vec2<int> v1 = nodes[rid][i];
                 vec2<int> v2 = nodes[rid][j];
                 int corner1 = blocked_corners[rid][i];
@@ -172,7 +188,8 @@ PathfindingData get_pathfinding_data(const Array2D<bool>& wall_dat) {
                         //
                         if (line_of_sight_unit(v1, v2, wall_dat)) {
                             candidate_edges.push_back({v1, v2});
-                            node_ij.push_back({i,j});
+                            node_ij.push_back({i, j});
+                            node_dists.push_back((v2 - v1).length());
                         } else
                             filtcount3 += 1;
                     } else
@@ -191,8 +208,8 @@ PathfindingData get_pathfinding_data(const Array2D<bool>& wall_dat) {
             }
             if (!edge_contains_another_edge) {
                 filtered_edges.push_back(candidate_edges[i]);
-                graph[node_ij[i].x].push_back(node_ij[i].y);
-                graph[node_ij[i].y].push_back(node_ij[i].x);
+                graph[node_ij[i].x].push_back({node_ij[i].y, node_dists[i]});
+                graph[node_ij[i].y].push_back({node_ij[i].x, node_dists[i]});
             }
             else
                 filtcount4 += 1;
@@ -222,29 +239,82 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
     int start_region = pf_data.tile_2_region_id[map_coords_start.x][map_coords_start.y];
     int end_region = pf_data.tile_2_region_id[map_coords_end.x][map_coords_end.y];
     printf("(%i,%i), (%i,%i) %i %i\n", map_coords_start.x, map_coords_start.y, map_coords_end.x, map_coords_end.y, start_region, end_region);
+    //
+    bool found_nearest_inbound_tile = false;
     if (start_region != end_region) {
         // TODO: draw a line from end_pos to click_pos, looking for a valid destination tile along the way
+        //        -- will modify map_coords_end if it finds a valid destination cell
         return waypoints;
     }
 
-    // TODO: weird stuff about nudging coordinates when clicking in a wall
+    //
+    // nudge end coordinates to a valid position when clicking near a wall
+    //
+    vec2<int> nudged_end_pos = end_pos;
+    if (found_nearest_inbound_tile || !valid_player_position(end_pos, wall_dat)) {
+        // starts with quantized pos --> nudges to desired pos
+        vec2<int> nudged_pos = map_coords_end * GRIDSIZE + vec2<int>(GRIDSIZE/2, GRIDSIZE/2);
+        //
+        printf("nudging destination: (%i,%i) --> (%i,%i)", end_pos.x, end_pos.y, nudged_pos.x, nudged_pos.y);
+        if (nudged_pos.x > end_pos.x) {
+            while (nudged_pos.x > end_pos.x && valid_player_position({nudged_pos.x - 1, nudged_pos.y}, wall_dat))
+                nudged_pos.x--;
+        }
+        else if (nudged_pos.x < end_pos.x) {
+            while (nudged_pos.x < end_pos.x && valid_player_position({nudged_pos.x + 1, nudged_pos.y}, wall_dat))
+                nudged_pos.x++;
+        }
+        if (nudged_pos.y > end_pos.y) {
+            while (nudged_pos.y > end_pos.y && valid_player_position({nudged_pos.x, nudged_pos.y - 1}, wall_dat))
+                nudged_pos.y--;
+        }
+        else if (nudged_pos.y < end_pos.y) {
+            while (nudged_pos.y < end_pos.y && valid_player_position({nudged_pos.x, nudged_pos.y + 1}, wall_dat))
+                nudged_pos.y++;
+        }
+        nudged_end_pos = nudged_pos;
+        printf(" --> (%i,%i)\n", nudged_end_pos.x, nudged_end_pos.y);
+    }
 
+    //
     // check for a straight line between start and end
+    //
     vec2<float> fcoords_start = {static_cast<float>(start_pos.x) / F_GRIDSIZE,
                                  static_cast<float>(start_pos.y) / F_GRIDSIZE};
-    vec2<float> fcoords_end = {static_cast<float>(end_pos.x) / F_GRIDSIZE,
-                               static_cast<float>(end_pos.y) / F_GRIDSIZE};
+    vec2<float> fcoords_end = {static_cast<float>(nudged_end_pos.x) / F_GRIDSIZE,
+                               static_cast<float>(nudged_end_pos.y) / F_GRIDSIZE};
     vec2<float> radius_adj = {PLAYER_RADIUS / F_GRIDSIZE, PLAYER_RADIUS / F_GRIDSIZE};
     if (line_of_sight_unit(fcoords_start - radius_adj, fcoords_end - radius_adj, wall_dat)) {
-        waypoints.push_back(end_pos);
+        waypoints.push_back(nudged_end_pos);
         return waypoints;
     }
 
-    // insert start position into graph
-    auto graph = pf_data.graphs[start_region];
-    int starting_node = graph.size();
-    int ending_node = graph.size() + 1;
-    // insert end position into graph
+    //
+    // pathfinding
+    //
+    auto graph = pf_data.graphs[start_region]; // we need a copy because we're going to modify it
+    int num_nodes = pf_data.nodes[start_region].size();
+    int starting_node = -1;
+    int ending_node = -2;
+
+    // insert start and end positions into graph
+    graph[starting_node] = std::vector<GraphNode>();
+    graph[ending_node] = std::vector<GraphNode>();
+    for (int i = 0; i < num_nodes; ++i) {
+        vec2<float> fcoords_node = {static_cast<float>(pf_data.nodes[start_region][i].x) / F_GRIDSIZE,
+                                    static_cast<float>(pf_data.nodes[start_region][i].y) / F_GRIDSIZE};
+        if (line_of_sight_unit(fcoords_start - radius_adj, fcoords_node, wall_dat)) {
+            float dist_to_node = (fcoords_node - fcoords_start).length();
+            graph[starting_node].push_back({i, dist_to_node});
+            graph[i].push_back({starting_node, dist_to_node});
+        }
+        if (line_of_sight_unit(fcoords_end - radius_adj, fcoords_node, wall_dat)) {
+            float dist_to_node = (fcoords_node - fcoords_end).length();
+            graph[ending_node].push_back({i, dist_to_node});
+            graph[i].push_back({ending_node, dist_to_node});
+        }
+    }
+    
     //
     // astar
     //

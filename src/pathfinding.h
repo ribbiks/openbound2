@@ -6,12 +6,17 @@
 #include "geometry.h"
 #include "Vec2.h"
 
+struct GraphNode {
+    int node;
+    float dist;
+};
+
 struct PathfindingData {
     Array2D<int> tile_2_region_id;
     int num_regions;
     std::vector<std::vector<vec2<int>>> nodes;
     std::vector<std::vector<Line>> edges;
-    std::vector<std::unordered_map<int, std::vector<int>>> graphs;
+    std::vector<std::unordered_map<int, std::vector<GraphNode>>> graphs;
 };
 
 struct BlockedDirections {
@@ -22,6 +27,7 @@ struct BlockedDirections {
 };
 
 bool line_of_sight_unit(const vec2<float>& v1, const vec2<float>& v2, const Array2D<bool>& wall_dat);
+bool valid_player_position(const vec2<int>& position, const Array2D<bool>& wall_dat);
 bool edge_has_good_incoming_angles(const vec2<int>& v1, const vec2<int>& v2, int corner1, int corner2);
 bool edge_never_turns_towards_wall(const vec2<int>& v1, const vec2<int>& v2, int corner1, int corner2);
 PathfindingData get_pathfinding_data(const Array2D<bool>& wall_dat);
