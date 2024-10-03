@@ -14,9 +14,8 @@ const float F_GRIDSIZE = static_cast<float>(GRIDSIZE);
 
 const float EPSILON = 0.0001f;
 
-// how much smaller is the player than a single GRIDSIZE?
-const float PLAYER_RADIUS_EPSILON = 0.01f;
-const float PLAYER_RADIUS = F_GRIDSIZE / 2.0f;
+const float PLAYER_RADIUS = 8.0f;
+const float PLAYER_RADIUS_GRIDUNITS = PLAYER_RADIUS / F_GRIDSIZE;
 
 const float RADIAN_SCALAR = 57.2957795; // 180 / pi
 const float ANGLE_SCALAR  = 0.01745329; // pi / 180

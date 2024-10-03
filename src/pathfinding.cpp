@@ -3,14 +3,8 @@
 #include <algorithm>
 #include <queue>
 
-#include "globals.h"
-
 bool line_of_sight_unit(const vec2<float>& v1, const vec2<float>& v2, const Array2D<bool>& wall_dat) {
-    const vec2<float> adj_list[] = {{PLAYER_RADIUS_EPSILON, PLAYER_RADIUS_EPSILON},
-                                    {1.0f - PLAYER_RADIUS_EPSILON, PLAYER_RADIUS_EPSILON},
-                                    {PLAYER_RADIUS_EPSILON, 1.0f - PLAYER_RADIUS_EPSILON},
-                                    {1.0f - PLAYER_RADIUS_EPSILON, 1.0f - PLAYER_RADIUS_EPSILON}};
-    for (const auto& adj : adj_list) {
+    for (const auto& adj : ADJ_LOS_UNIT) {
         float x1 = v1.x + adj.x;
         float y1 = v1.y + adj.y;
         float x2 = v2.x + adj.x;
@@ -22,11 +16,7 @@ bool line_of_sight_unit(const vec2<float>& v1, const vec2<float>& v2, const Arra
 }
 
 bool valid_player_position(const vec2<int>& position, const Array2D<bool>& wall_dat) {
-    const vec2<float> adj_list[] = {{-PLAYER_RADIUS, -PLAYER_RADIUS},
-                                    {-PLAYER_RADIUS,  PLAYER_RADIUS},
-                                    { PLAYER_RADIUS, -PLAYER_RADIUS},
-                                    { PLAYER_RADIUS,  PLAYER_RADIUS}};
-    for (const auto& adj : adj_list) {
+    for (const auto& adj : ADJ_VALIDPOS) {
         vec2<int> v_adj = position + adj;
         vec2<int> v_map = {v_adj.x / GRIDSIZE, v_adj.y / GRIDSIZE};
         if (wall_dat[v_map.x][v_map.y])
@@ -183,13 +173,13 @@ PathfindingData get_pathfinding_data(const Array2D<bool>& wall_dat) {
                 int corner2 = blocked_corners[rid][j];
                 //
                 if (edge_has_good_incoming_angles(v1, v2, corner1, corner2)) {
-                    //
                     if (edge_never_turns_towards_wall(v1, v2, corner1, corner2)) {
-                        //
-                        if (line_of_sight_unit(v1, v2, wall_dat)) {
+                        vec2<float> v1f = {static_cast<float>(v1.x) + 0.5f, static_cast<float>(v1.y) + 0.5f};
+                        vec2<float> v2f = {static_cast<float>(v2.x) + 0.5f, static_cast<float>(v2.y) + 0.5f};
+                        if (line_of_sight_unit(v1f, v2f, wall_dat)) {
                             candidate_edges.push_back({v1, v2});
                             node_ij.push_back({i, j});
-                            node_dists.push_back((v2 - v1).length());
+                            node_dists.push_back((v2f - v1f).length());
                         } else
                             filtcount3 += 1;
                     } else
@@ -283,8 +273,7 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
                                  static_cast<float>(start_pos.y) / F_GRIDSIZE};
     vec2<float> fcoords_end = {static_cast<float>(nudged_end_pos.x) / F_GRIDSIZE,
                                static_cast<float>(nudged_end_pos.y) / F_GRIDSIZE};
-    vec2<float> radius_adj = {PLAYER_RADIUS / F_GRIDSIZE, PLAYER_RADIUS / F_GRIDSIZE};
-    if (line_of_sight_unit(fcoords_start - radius_adj, fcoords_end - radius_adj, wall_dat)) {
+    if (line_of_sight_unit(fcoords_start, fcoords_end, wall_dat)) {
         waypoints.push_back(nudged_end_pos);
         return waypoints;
     }
@@ -294,29 +283,86 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
     //
     auto graph = pf_data.graphs[start_region]; // we need a copy because we're going to modify it
     int num_nodes = pf_data.nodes[start_region].size();
-    int starting_node = -1;
-    int ending_node = -2;
+    int starting_node = num_nodes;
+    int ending_node = num_nodes+1;
 
     // insert start and end positions into graph
+    // - also create astar heuristic since we're computing distances to the end node anyway
     graph[starting_node] = std::vector<GraphNode>();
     graph[ending_node] = std::vector<GraphNode>();
+    std::vector<float> heuristic;
     for (int i = 0; i < num_nodes; ++i) {
-        vec2<float> fcoords_node = {static_cast<float>(pf_data.nodes[start_region][i].x) / F_GRIDSIZE,
-                                    static_cast<float>(pf_data.nodes[start_region][i].y) / F_GRIDSIZE};
-        if (line_of_sight_unit(fcoords_start - radius_adj, fcoords_node, wall_dat)) {
-            float dist_to_node = (fcoords_node - fcoords_start).length();
-            graph[starting_node].push_back({i, dist_to_node});
-            graph[i].push_back({starting_node, dist_to_node});
+        vec2<float> fcoords_node = {static_cast<float>(pf_data.nodes[start_region][i].x) + 0.5f,
+                                    static_cast<float>(pf_data.nodes[start_region][i].y) + 0.5f};
+        if (line_of_sight_unit(fcoords_start, fcoords_node, wall_dat)) {
+            float dist_to_start_node = (fcoords_node - fcoords_start).length();
+            graph[starting_node].push_back({i, dist_to_start_node});
+            graph[i].push_back({starting_node, dist_to_start_node});
         }
-        if (line_of_sight_unit(fcoords_end - radius_adj, fcoords_node, wall_dat)) {
-            float dist_to_node = (fcoords_node - fcoords_end).length();
-            graph[ending_node].push_back({i, dist_to_node});
-            graph[i].push_back({ending_node, dist_to_node});
+        float dist_to_end_node = (fcoords_node - fcoords_end).length();
+        heuristic.push_back(dist_to_end_node);
+        if (line_of_sight_unit(fcoords_end, fcoords_node, wall_dat)) {
+            graph[ending_node].push_back({i, dist_to_end_node});
+            graph[i].push_back({ending_node, dist_to_end_node});
         }
     }
+    heuristic.push_back((fcoords_start - fcoords_end).length()); // starting_node
+    heuristic.push_back(0.0f);                                   // ending_node
+
+    //for (size_t i = 0; i < pf_data.nodes[start_region].size(); ++i)
+    //    printf("NODE %zu: (%i,%i)\n", i, pf_data.nodes[start_region][i].x, pf_data.nodes[start_region][i].y);
     
     //
     // astar
     //
+    std::priority_queue<std::pair<int, float>, std::vector<std::pair<int, float>>, CompareNode> openSet;
+    std::unordered_map<int, int> cameFrom;
+    std::unordered_map<int, float> gScore;
+    std::unordered_map<int, float> fScore;
+
+    openSet.push({starting_node, 0});
+    gScore[starting_node] = 0;
+    fScore[starting_node] = heuristic[starting_node];
+
+    std::vector<int> path;
+    while (!openSet.empty()) {
+        int current = openSet.top().first;
+        //printf("INSIDE ASTAR: %i %i \n", current, ending_node);
+        openSet.pop();
+
+        if (current == ending_node) {
+            while (current != starting_node) {
+                path.push_back(current);
+                current = cameFrom[current];
+            }
+            path.push_back(starting_node);
+            std::reverse(path.begin(), path.end());
+            break;
+        }
+
+        if (graph.find(current) == graph.end())
+            continue;
+
+        for (const auto& neighbor : graph.at(current)) {
+            float tentative_gScore = gScore[current] + neighbor.dist;
+            //printf("HELLO? %i g=%f\n", neighbor.node, tentative_gScore);
+            if (gScore.find(neighbor.node) == gScore.end() || tentative_gScore < gScore[neighbor.node]) {
+                cameFrom[neighbor.node] = current;
+                gScore[neighbor.node] = tentative_gScore;
+                fScore[neighbor.node] = gScore[neighbor.node] + heuristic[neighbor.node];
+                //printf("HELLO! %i g=%f h=%f f=%f\n", neighbor.node, gScore[neighbor.node], heuristic[neighbor.node], fScore[neighbor.node]);
+                openSet.push({neighbor.node, fScore[neighbor.node]});
+            }
+        }
+    }
+
+    for(size_t i = 0; i < path.size(); ++i){
+        if (path[i] == ending_node)
+            waypoints.push_back(nudged_end_pos);
+        else if (path[i] != starting_node) {
+            waypoints.push_back(pf_data.nodes[start_region][path[i]] * GRIDSIZE + vec2<int>(GRIDSIZE / 2, GRIDSIZE / 2));
+        }
+    }
+
     return waypoints;
 }

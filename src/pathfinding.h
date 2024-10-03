@@ -4,6 +4,7 @@
 
 #include "Array2D.h"
 #include "geometry.h"
+#include "globals.h"
 #include "Vec2.h"
 
 struct GraphNode {
@@ -25,6 +26,23 @@ struct BlockedDirections {
     static const int SW = 4;
     static const int SE = 8;
 };
+
+// custom comparator for the priority queue (used for astar)
+struct CompareNode {
+    bool operator()(const std::pair<int, float>& a, const std::pair<int, float>& b) {
+        return a.second > b.second;
+    }
+};
+
+static const vec2<float> ADJ_LOS_UNIT[] = {{-(PLAYER_RADIUS_GRIDUNITS - EPSILON), -(PLAYER_RADIUS_GRIDUNITS - EPSILON)},
+                                           {-(PLAYER_RADIUS_GRIDUNITS - EPSILON),  (PLAYER_RADIUS_GRIDUNITS - EPSILON)},
+                                           { (PLAYER_RADIUS_GRIDUNITS - EPSILON), -(PLAYER_RADIUS_GRIDUNITS - EPSILON)},
+                                           { (PLAYER_RADIUS_GRIDUNITS - EPSILON),  (PLAYER_RADIUS_GRIDUNITS - EPSILON)}};
+
+static const vec2<float> ADJ_VALIDPOS[] = {{-PLAYER_RADIUS, -PLAYER_RADIUS},
+                                           {-PLAYER_RADIUS,  PLAYER_RADIUS},
+                                           { PLAYER_RADIUS, -PLAYER_RADIUS},
+                                           { PLAYER_RADIUS,  PLAYER_RADIUS}};
 
 bool line_of_sight_unit(const vec2<float>& v1, const vec2<float>& v2, const Array2D<bool>& wall_dat);
 bool valid_player_position(const vec2<int>& position, const Array2D<bool>& wall_dat);
