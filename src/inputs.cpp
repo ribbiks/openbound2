@@ -75,6 +75,8 @@ void get_inputs(player_inputs* inputs) {
                     break;
                 case SDLK_LSHIFT:
                 case SDLK_RSHIFT:
+                case SDLK_LALT:
+                case SDLK_RALT:
                     inputs->key_shift = true;
                     break;
                 case SDLK_ESCAPE:
@@ -108,6 +110,8 @@ void get_inputs(player_inputs* inputs) {
                     break;
                 case SDLK_LSHIFT:
                 case SDLK_RSHIFT:
+                case SDLK_LALT:
+                case SDLK_RALT:
                     inputs->key_shift = false;
                     break;
                 case SDLK_ESCAPE:

@@ -44,6 +44,8 @@ static const vec2<float> ADJ_VALIDPOS[] = {{-PLAYER_RADIUS, -PLAYER_RADIUS},
                                            { PLAYER_RADIUS, -PLAYER_RADIUS},
                                            { PLAYER_RADIUS,  PLAYER_RADIUS}};
 
+static const vec2<int> MOVE_DIR[] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
 bool line_of_sight_unit(const vec2<float>& v1, const vec2<float>& v2, const Array2D<bool>& wall_dat);
 bool valid_player_position(const vec2<int>& position, const Array2D<bool>& wall_dat);
 bool edge_has_good_incoming_angles(const vec2<int>& v1, const vec2<int>& v2, int corner1, int corner2);

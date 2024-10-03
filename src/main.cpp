@@ -46,16 +46,16 @@ void main_loop() {
     accumulator = std::min(accumulator + frame_time, MAX_ACCUM);
 
     // DEBUGGING STUFF
-    if (current_tic == 20) {
-        game->animation_manager->add_animation("cursor_loop",
-                                              {"assets/cursor_0.png",
-                                               "assets/cursor_1.png",
-                                               "assets/cursor_2.png",
-                                               "assets/cursor_3.png",
-                                               "assets/cursor_4.png"},
-                                               {10,5,10,5,20});
-        game->animation_manager->start_new_animation("cursor_loop", "anim_id_1", {256,256}, true);
-    }
+    //if (current_tic == 20) {
+    //    game->animation_manager->add_animation("cursor_loop",
+    //                                          {"assets/cursor_0.png",
+    //                                           "assets/cursor_1.png",
+    //                                           "assets/cursor_2.png",
+    //                                           "assets/cursor_3.png",
+    //                                           "assets/cursor_4.png"},
+    //                                           {10,5,10,5,20});
+    //    game->animation_manager->start_new_animation("cursor_loop", "anim_id_1", {256,256}, true);
+    //}
 
     // updates that occur every frame (camera, mouse cursors)
     update_fps();

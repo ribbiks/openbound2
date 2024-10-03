@@ -5,11 +5,7 @@
 
 bool line_of_sight_unit(const vec2<float>& v1, const vec2<float>& v2, const Array2D<bool>& wall_dat) {
     for (const auto& adj : ADJ_LOS_UNIT) {
-        float x1 = v1.x + adj.x;
-        float y1 = v1.y + adj.y;
-        float x2 = v2.x + adj.x;
-        float y2 = v2.y + adj.y;
-        if (!line_of_sight(x1, y1, x2, y2, wall_dat))
+        if (!points_are_visible_to_eachother({v1.x + adj.x, v1.y + adj.y}, {v2.x + adj.x, v2.y + adj.y}, wall_dat))
             return false;
     }
     return true;
@@ -76,9 +72,8 @@ PathfindingData get_pathfinding_data(const Array2D<bool>& wall_dat) {
     int height = wall_dat.height();
     
     Array2D<int> tile_2_region_id(width, height, -1);
-    Array2D<bool> visited(width, height, 0);  // 0 for false, 1 for true
+    Array2D<bool> visited(width, height, false);
     int num_regions = 0;
-    const vec2<int> directions[] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
     for (int x = 1; x < width - 1; ++x) {
         for (int y = 1; y < height - 1; ++y) {
@@ -87,12 +82,11 @@ PathfindingData get_pathfinding_data(const Array2D<bool>& wall_dat) {
                 tile_2_region_id[x][y] = num_regions;
                 
                 std::queue<vec2<int>> queue;
-                queue.push(vec2<int>(x, y));
-
+                queue.push({x,y});
                 while (!queue.empty()) {
                     vec2<int> current = queue.front();
                     queue.pop();
-                    for (const auto& dir : directions) {
+                    for (const auto& dir : MOVE_DIR) {
                         vec2<int> next = current + dir;
                         if (next.x >= 0 && next.x < width && next.y >= 0 && next.y < height && !visited[next.x][next.y] && !wall_dat[next.x][next.y]) {
                             visited[next.x][next.y] = true;
@@ -232,9 +226,49 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
     //
     bool found_nearest_inbound_tile = false;
     if (start_region != end_region) {
-        // TODO: draw a line from end_pos to click_pos, looking for a valid destination tile along the way
-        //        -- will modify map_coords_end if it finds a valid destination cell
-        return waypoints;
+        // draw a line from end_pos to click_pos, looking for a valid destination tile along the way
+        //  - will modify map_coords_end if it finds a valid destination cell
+        float x1 = static_cast<float>(map_coords_end.x) + 0.5f;
+        float y1 = static_cast<float>(map_coords_end.y) + 0.5f;
+        float x2 = static_cast<float>(start_pos.x) / F_GRIDSIZE;
+        float y2 = static_cast<float>(start_pos.y) / F_GRIDSIZE;
+        vec2<int> found_tile = line_of_sight(x1, y1, x2, y2, wall_dat, false);
+        if (found_tile != NULL_VEC) {
+            map_coords_end = found_tile;
+            printf("clicked out of bounds, using nearest tile [dda]: (%i,%i)\n", found_tile.x, found_tile.y);
+        }
+        else {
+            // if line drawing failed, lets do a bfs to find the nearest valid tile
+            int width = wall_dat.width();
+            int height = wall_dat.height();
+            Array2D<bool> visited(width, height, false); // this is inefficient
+            std::queue<vec2<int>> queue;
+            queue.push(map_coords_end);
+            while (!queue.empty()) {
+                vec2<int> current = queue.front();
+                queue.pop();
+                if (pf_data.tile_2_region_id[current.x][current.y] == start_region) {
+                    found_tile = current;
+                    break;
+                }
+                for (const auto& dir : MOVE_DIR) {
+                    vec2<int> next = current + dir;
+                    if (next.x >= 0 && next.x < width && next.y >= 0 && next.y < height &&
+                        !visited[next.x][next.y] &&
+                        (pf_data.tile_2_region_id[next.x][next.y] == -1 || pf_data.tile_2_region_id[next.x][next.y] == start_region)) {
+                        visited[next.x][next.y] = true;
+                        queue.push(next);
+                    }
+                }
+            }
+            if (found_tile != NULL_VEC) {
+                map_coords_end = found_tile;
+                printf("clicked out of bounds, using nearest tile [bfs]: (%i,%i)\n", found_tile.x, found_tile.y);
+            }
+            // both strategies failed so we're just not going to move, sorry!
+            else
+                return waypoints;
+        }
     }
 
     //

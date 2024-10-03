@@ -83,7 +83,14 @@ private:
             d_ang -= 360.0f;
         bool is_clockwise = d_ang < 0;
 
-        // TODO: reimplement clicking-against-wall logic
+        // if player is trying to do a 180 turn against a wall, turn towards the wall (it looks bad otherwise)
+        if (d_ang > 180.f - EPSILON) {
+            vec2<float> d_vec2 = clickpos - start_position;
+            float g_ang2 = -std::atan2(d_vec2.y, d_vec2.x) * RADIAN_SCALAR;
+            float d_ang2 = g_ang2 - start_angle;
+            d_ang2 = std::fmod(d_ang2 + 540.0f, 360.0f) - 180.0f;
+            is_clockwise = d_ang2 < 0;
+        }
 
         int num_turn_frames = get_turn_delay(std::abs(d_ang));
         std::queue<float> upcoming_angs;

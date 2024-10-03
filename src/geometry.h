@@ -23,7 +23,10 @@ struct FRect {
     vec2<float> size;      // width and height
 };
 
-bool line_of_sight(float x1, float y1, float x2, float y2, const Array2D<bool>& wall_dat);
+const vec2<int> NULL_VEC = {-99999, -99999};
+
+vec2<int> line_of_sight(float x1, float y1, float x2, float y2, const Array2D<bool>& wall_dat, bool stop_at = true);
+bool points_are_visible_to_eachother(const vec2<float>& p1, const vec2<float>& p2, const Array2D<bool>& wall_dat);
 int cross(const vec2<int>& a, const vec2<int>& b);
 bool points_are_collinear(const vec2<int>& a, const vec2<int>& b, const vec2<int>& c);
 bool point_is_on_line_segment(const vec2<int>& p, const Line& line);
