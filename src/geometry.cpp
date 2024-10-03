@@ -1,11 +1,9 @@
 #include "geometry.h"
 
-//
-// uses DDA algorithm for grid traversal (adapated from a 3d voxel version)
-//
-vec2<int> line_of_sight(float x1, float y1, float x2, float y2, const Array2D<bool>& wall_dat, bool stop_at) {
+std::vector<vec2<int>> dda_grid_traversal(float x1, float y1, float x2, float y2) {
     float tMaxX, tMaxY, tDeltaX, tDeltaY;
-    vec2<int> voxel; 
+    vec2<int> voxel;
+    std::vector<vec2<int>> out_voxels;
 
     int dx = SIGN(x2 - x1);
     if (dx != 0)
@@ -30,8 +28,7 @@ vec2<int> line_of_sight(float x1, float y1, float x2, float y2, const Array2D<bo
     voxel.y = static_cast<int>(y1);
 
     // uncomment this to apply checks to starting tile
-    //if (wall_dat[voxel.x][voxel.y] == stop_at)
-    //    return voxel;
+    //out_voxels.push_back(voxel);
 
     while (true) {
         if (tMaxX < tMaxY) {
@@ -44,17 +41,18 @@ vec2<int> line_of_sight(float x1, float y1, float x2, float y2, const Array2D<bo
         }
         if (tMaxX > 1 && tMaxY > 1)
             break;
-        //
-        if (wall_dat[voxel.x][voxel.y] == stop_at)
-            return voxel;
+        out_voxels.push_back(voxel);
     }
-    return NULL_VEC;
+    return out_voxels;
 }
 
 bool points_are_visible_to_eachother(const vec2<float>& p1, const vec2<float>& p2, const Array2D<bool>& wall_dat) {
-    if (line_of_sight(p1.x, p1.y, p2.x, p2.y, wall_dat) == NULL_VEC)
-        return true;
-    return false;
+    std::vector<vec2<int>> voxels = dda_grid_traversal(p1.x, p1.y, p2.x, p2.y);
+    for (size_t i = 0; i < voxels.size(); ++i) {
+        if (wall_dat[voxels[i].x][voxels[i].y])
+            return false;
+    }
+    return true;
 }
 
 int cross(const vec2<int>& a, const vec2<int>& b) {

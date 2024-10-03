@@ -222,7 +222,6 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
     vec2<int> map_coords_end = {end_pos.x / GRIDSIZE, end_pos.y / GRIDSIZE};       // (cx,cy)
     int start_region = pf_data.tile_2_region_id[map_coords_start.x][map_coords_start.y];
     int end_region = pf_data.tile_2_region_id[map_coords_end.x][map_coords_end.y];
-    printf("(%i,%i), (%i,%i) %i %i\n", map_coords_start.x, map_coords_start.y, map_coords_end.x, map_coords_end.y, start_region, end_region);
     //
     bool found_nearest_inbound_tile = false;
     if (start_region != end_region) {
@@ -232,9 +231,17 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
         float y1 = static_cast<float>(map_coords_end.y) + 0.5f;
         float x2 = static_cast<float>(start_pos.x) / F_GRIDSIZE;
         float y2 = static_cast<float>(start_pos.y) / F_GRIDSIZE;
-        vec2<int> found_tile = line_of_sight(x1, y1, x2, y2, wall_dat, false);
+        vec2<int> found_tile = NULL_VEC;
+        std::vector<vec2<int>> voxels = dda_grid_traversal(x1, y1, x2, y2);
+        for (size_t i = 0; i < voxels.size(); ++i) {
+            if (pf_data.tile_2_region_id[voxels[i].x][voxels[i].y] == start_region) {
+                found_tile = voxels[i];
+                break;
+            }
+        }
         if (found_tile != NULL_VEC) {
             map_coords_end = found_tile;
+            found_nearest_inbound_tile = true;
             printf("clicked out of bounds, using nearest tile [dda]: (%i,%i)\n", found_tile.x, found_tile.y);
         }
         else {
@@ -263,6 +270,7 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
             }
             if (found_tile != NULL_VEC) {
                 map_coords_end = found_tile;
+                found_nearest_inbound_tile = true;
                 printf("clicked out of bounds, using nearest tile [bfs]: (%i,%i)\n", found_tile.x, found_tile.y);
             }
             // both strategies failed so we're just not going to move, sorry!
@@ -311,6 +319,7 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
         waypoints.push_back(nudged_end_pos);
         return waypoints;
     }
+    printf("OH NO...\n");
 
     //
     // pathfinding
