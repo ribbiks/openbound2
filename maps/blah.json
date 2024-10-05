@@ -2,6 +2,7 @@
     "map_name":   "blah",
     "map_author": "",
     "map_notes":  "",
+    "tileset":    "assets/tile_data.json",
     "difficulty": 5,
     "map_width":  50,
     "map_height": 34,

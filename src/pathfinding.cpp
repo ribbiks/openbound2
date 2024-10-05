@@ -319,7 +319,6 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
         waypoints.push_back(nudged_end_pos);
         return waypoints;
     }
-    printf("OH NO...\n");
 
     //
     // pathfinding
