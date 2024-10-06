@@ -26,13 +26,14 @@ std::vector<SDL_Surface*> load_spritesheet(const std::string& image_filename, co
     int num_rows = full_img->h / sprite_dimensions.y;
 
     std::vector<SDL_Surface*> out_vector;
-    for (int i = 0; i < num_cols; ++i) {
-        for (int j = 0; j < num_rows; ++j) {
-            SDL_Rect sprite_rect = {i * sprite_dimensions.x, j * sprite_dimensions.y, sprite_dimensions.x, sprite_dimensions.y};
+    for (int i = 0; i < num_rows; ++i) {
+        for (int j = 0; j < num_cols; ++j) {
+            SDL_Rect sprite_rect = {j * sprite_dimensions.x, i * sprite_dimensions.y, sprite_dimensions.x, sprite_dimensions.y};
             SDL_Surface* sprite_surface = SDL_CreateRGBSurface(0, sprite_rect.w, sprite_rect.h, 32, 0, 0, 0, 0);
             SDL_Rect floodfill = {0, 0, sprite_surface->w, sprite_surface->h};
             SDL_FillRect(sprite_surface, &floodfill, SDL_MapRGB(sprite_surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
             SDL_BlitSurface(full_img, &sprite_rect, sprite_surface, nullptr);
+            SDL_SetColorKey(sprite_surface, SDL_TRUE, SDL_MapRGB(sprite_surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
             out_vector.push_back(sprite_surface);
         }
     }
