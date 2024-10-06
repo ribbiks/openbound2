@@ -27,7 +27,7 @@ double accumulator = 0.0;
 double previous_update_time = 0.0;
 int current_tic = 0;
 
-player_inputs* inputs = nullptr;
+PlayerInputs* inputs = nullptr;
 
 void update_fps() {
     frame_count++;
@@ -100,7 +100,7 @@ int main() {
 
     SDL_Color fps_text_color = {255, 255, 255, 255};
     fps_font = new Font("assets/small_font.png", fps_text_color, 2);
-    inputs = new player_inputs;
+    inputs = new PlayerInputs;
 
     ///////////////////////////////////
     #ifdef __EMSCRIPTEN__ /////////////

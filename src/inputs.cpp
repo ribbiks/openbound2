@@ -1,6 +1,6 @@
 #include "inputs.h"
 
-void get_inputs(player_inputs* inputs) {
+void get_inputs(PlayerInputs* inputs) {
     // mouse pos
     inputs->mouse_state = SDL_GetMouseState(&inputs->mouse_x, &inputs->mouse_y);
     // button presses

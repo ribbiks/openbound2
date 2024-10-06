@@ -1,4 +1,6 @@
 #include <cmath>
+#include <stdexcept>
+
 #include <SDL.h>
 #include <SDL_image.h>
 
@@ -6,7 +8,7 @@
 #include "globals.h"
 #include "misc_gfx.h"
 
-SDL_Surface* load_image(std::string image_filename) {
+SDL_Surface* load_image(const std::string& image_filename) {
     SDL_Surface* surface = IMG_Load(image_filename.c_str());
     if (surface == nullptr) {
         SDL_Log("Unable to load image %s! SDL_image Error: %s\n", image_filename.c_str(), IMG_GetError());
@@ -14,6 +16,29 @@ SDL_Surface* load_image(std::string image_filename) {
     }
     SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
     return surface;
+}
+
+std::vector<SDL_Surface*> load_spritesheet(const std::string& image_filename, const vec2<int>& sprite_dimensions) {
+    SDL_Surface* full_img = load_image(image_filename);
+    if (full_img->w % sprite_dimensions.x > 0 || full_img->h % sprite_dimensions.y > 0)
+        throw std::invalid_argument("invalid spritesheet size");
+    int num_cols = full_img->w / sprite_dimensions.x;
+    int num_rows = full_img->h / sprite_dimensions.y;
+
+    std::vector<SDL_Surface*> out_vector;
+    for (int i = 0; i < num_cols; ++i) {
+        for (int j = 0; j < num_rows; ++j) {
+            SDL_Rect sprite_rect = {i * sprite_dimensions.x, j * sprite_dimensions.y, sprite_dimensions.x, sprite_dimensions.y};
+            SDL_Surface* sprite_surface = SDL_CreateRGBSurface(0, sprite_rect.w, sprite_rect.h, 32, 0, 0, 0, 0);
+            SDL_Rect floodfill = {0, 0, sprite_surface->w, sprite_surface->h};
+            SDL_FillRect(sprite_surface, &floodfill, SDL_MapRGB(sprite_surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
+            SDL_BlitSurface(full_img, &sprite_rect, sprite_surface, nullptr);
+            out_vector.push_back(sprite_surface);
+        }
+    }
+    SDL_FreeSurface(full_img);
+
+    return out_vector;
 }
 
 SDL_Surface* rescale_surface(SDL_Surface* src, int new_width, int new_height) {

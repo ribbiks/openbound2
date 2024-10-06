@@ -23,7 +23,7 @@ G_Bounding::~G_Bounding() {
     most_recent_order = nullptr;
 }
 
-void G_Bounding::update(Game* game, player_inputs* inputs, double frame_time) {
+void G_Bounding::update(Game* game, PlayerInputs* inputs) {
     //
     // player selection and orders
     //
@@ -56,8 +56,7 @@ void G_Bounding::update(Game* game, player_inputs* inputs, double frame_time) {
     }
 }
 
-void G_Bounding::tick(Game* game, player_inputs* inputs) {
-    vec2<int> camera_pos = game->get_camera_pos();
+void G_Bounding::tick(Game* game, PlayerInputs* inputs) {
     //
     world_map->tick();
     //

@@ -76,7 +76,7 @@ std::vector<vec2<int>> WorldMap::pathfind(const vec2<int>& start_pos, const vec2
 }
 
 void WorldMap::tick() {
-    //
+    tile_manager->tick();
 }
 
 void WorldMap::draw(const vec2<int>& offset) {

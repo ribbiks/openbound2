@@ -13,12 +13,16 @@ AnimationManager::~AnimationManager() {
     }
 }
 
-void AnimationManager::add_animation(std::string name, std::vector<std::string> image_list, std::vector<int> frames_per_image) {
+void AnimationManager::add_animation(const std::string& name,
+                                     const std::string& image_filename,
+                                     const vec2<int>& sprite_dimensions,
+                                     const std::vector<int>& frames_per_image) {
+    std::vector<SDL_Surface*> image_list = load_spritesheet(image_filename, sprite_dimensions);
     if (frames_per_image.size() > 0 && frames_per_image.size() != image_list.size())
         throw std::invalid_argument("image_list size does not match frames_per_image size");
-    animation_sequence anim_dat;
+    AnimationSequence anim_dat;
     for (size_t i = 0; i < image_list.size(); ++i) {
-        anim_dat.frames.push_back(load_image(image_list[i]));
+        anim_dat.frames.push_back(image_list[i]);
         if (frames_per_image.size() > 0)
             anim_dat.durations.push_back(frames_per_image[i]);
         else
@@ -28,13 +32,21 @@ void AnimationManager::add_animation(std::string name, std::vector<std::string> 
     all_animations[name] = anim_dat;
 }
 
-void AnimationManager::start_new_animation(std::string name, std::string id, vec2<int> position, bool is_looping) {
+void AnimationManager::start_new_animation(const std::string& name, const std::string& id, const vec2<int>& position, bool is_looping) {
     if (all_animations.count(name) == 0)
         throw std::invalid_argument("all_animations does not contain image with name " + name);
     active_animations[id] = {name, position, 0, 0, is_looping};
 }
 
-void AnimationManager::remove_animation(std::string id) {
+SDL_Surface* AnimationManager::get_animating_surface(const std::string& id) {
+    if (active_animations.count(id) == 0)
+        return nullptr;
+    AnimationSequence* my_animdat = &all_animations[active_animations[id].name];
+    unsigned int current_frame = active_animations[id].current_frame;
+    return my_animdat->frames[current_frame];
+}
+
+void AnimationManager::remove_animation(const std::string& id) {
     active_animations.erase(id);
 }
 
@@ -44,7 +56,7 @@ void AnimationManager::remove_all_animations() {
 
 void AnimationManager::tick() {
     for (auto it = active_animations.begin(); it != active_animations.end();) {
-        animation_sequence* my_animdat = &all_animations[it->second.name];
+        AnimationSequence* my_animdat = &all_animations[it->second.name];
         // increment animations ticks
         it->second.current_tick_within_frame += 1;
         //printf("frame %i: %i / %i\n", it->second.current_frame, it->second.current_tick_within_frame, my_animdat->durations[it->second.current_frame]);
@@ -69,7 +81,7 @@ void AnimationManager::tick() {
 
 void AnimationManager::draw(const vec2<int>& offset) {
     for (const auto& pair : active_animations) {
-        animation_sequence* my_animdat = &all_animations[pair.second.name];
+        AnimationSequence* my_animdat = &all_animations[pair.second.name];
         unsigned int current_frame = pair.second.current_frame;
         vec2<int> position = pair.second.position;
         SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, my_animdat->frames[current_frame]);

@@ -10,7 +10,7 @@ G_MainMenu::~G_MainMenu() {
     //
 }
 
-void G_MainMenu::update(Game* game, player_inputs* inputs, double frame_time) {
+void G_MainMenu::update(Game* game, PlayerInputs* inputs) {
     // if not emscripten, escape triggers quit
     #ifndef __EMSCRIPTEN__
     if (inputs->key_escape) {
@@ -24,7 +24,7 @@ void G_MainMenu::update(Game* game, player_inputs* inputs, double frame_time) {
     }
 }
 
-void G_MainMenu::tick(Game* game, player_inputs* inputs) {
+void G_MainMenu::tick(Game* game, PlayerInputs* inputs) {
     //
 }
 

@@ -4,7 +4,7 @@
 
 extern SDL_Window* window;
 
-struct player_inputs {
+struct PlayerInputs {
     int mouse_x;
     int mouse_y;
     Uint32 mouse_state;
@@ -25,10 +25,10 @@ struct player_inputs {
     bool quit;
 
     // default constructor
-    player_inputs() {}
+    PlayerInputs() {}
 
     // copy constructor
-    player_inputs(const player_inputs& other) : 
+    PlayerInputs(const PlayerInputs& other) : 
         mouse_x(other.mouse_x),
         mouse_y(other.mouse_y),
         mouse_state(other.mouse_state),
@@ -49,4 +49,4 @@ struct player_inputs {
         quit(other.quit) {}
 };
 
-void get_inputs(player_inputs* inputs);
+void get_inputs(PlayerInputs* inputs);

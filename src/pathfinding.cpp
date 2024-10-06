@@ -357,25 +357,25 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
     //
     // astar
     //
-    std::priority_queue<std::pair<int, float>, std::vector<std::pair<int, float>>, CompareNode> openSet;
-    std::unordered_map<int, int> cameFrom;
-    std::unordered_map<int, float> gScore;
-    std::unordered_map<int, float> fScore;
+    std::priority_queue<std::pair<int, float>, std::vector<std::pair<int, float>>, CompareNode> open_set;
+    std::unordered_map<int, int> came_from;
+    std::unordered_map<int, float> g_score;
+    std::unordered_map<int, float> f_score;
 
-    openSet.push({starting_node, 0});
-    gScore[starting_node] = 0;
-    fScore[starting_node] = heuristic[starting_node];
+    open_set.push({starting_node, 0});
+    g_score[starting_node] = 0;
+    f_score[starting_node] = heuristic[starting_node];
 
     std::vector<int> path;
-    while (!openSet.empty()) {
-        int current = openSet.top().first;
+    while (!open_set.empty()) {
+        int current = open_set.top().first;
         //printf("INSIDE ASTAR: %i %i \n", current, ending_node);
-        openSet.pop();
+        open_set.pop();
 
         if (current == ending_node) {
             while (current != starting_node) {
                 path.push_back(current);
-                current = cameFrom[current];
+                current = came_from[current];
             }
             path.push_back(starting_node);
             std::reverse(path.begin(), path.end());
@@ -386,14 +386,14 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
             continue;
 
         for (const auto& neighbor : graph.at(current)) {
-            float tentative_gScore = gScore[current] + neighbor.dist;
-            //printf("HELLO? %i g=%f\n", neighbor.node, tentative_gScore);
-            if (gScore.find(neighbor.node) == gScore.end() || tentative_gScore < gScore[neighbor.node]) {
-                cameFrom[neighbor.node] = current;
-                gScore[neighbor.node] = tentative_gScore;
-                fScore[neighbor.node] = gScore[neighbor.node] + heuristic[neighbor.node];
-                //printf("HELLO! %i g=%f h=%f f=%f\n", neighbor.node, gScore[neighbor.node], heuristic[neighbor.node], fScore[neighbor.node]);
-                openSet.push({neighbor.node, fScore[neighbor.node]});
+            float tentative_g_score = g_score[current] + neighbor.dist;
+            //printf("HELLO? %i g=%f\n", neighbor.node, tentative_g_score);
+            if (g_score.find(neighbor.node) == g_score.end() || tentative_g_score < g_score[neighbor.node]) {
+                came_from[neighbor.node] = current;
+                g_score[neighbor.node] = tentative_g_score;
+                f_score[neighbor.node] = g_score[neighbor.node] + heuristic[neighbor.node];
+                //printf("HELLO! %i g=%f h=%f f=%f\n", neighbor.node, g_score[neighbor.node], heuristic[neighbor.node], f_score[neighbor.node]);
+                open_set.push({neighbor.node, f_score[neighbor.node]});
             }
         }
     }

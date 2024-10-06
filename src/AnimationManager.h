@@ -9,13 +9,13 @@
 
 extern SDL_Renderer* renderer;
 
-struct animation_sequence {
+struct AnimationSequence {
     std::vector<SDL_Surface*> frames;
     std::vector<unsigned int> durations;
     std::vector<vec2<int>> offsets;
 };
 
-struct active_animation {
+struct ActiveAnimation {
     std::string name;
     vec2<int> position;
     unsigned int current_frame;
@@ -25,15 +25,16 @@ struct active_animation {
 
 class AnimationManager {
 private:
-     std::unordered_map<std::string, animation_sequence> all_animations;
-     std::unordered_map<std::string, active_animation> active_animations;
+     std::unordered_map<std::string, AnimationSequence> all_animations;
+     std::unordered_map<std::string, ActiveAnimation> active_animations;
 
 public:
     AnimationManager();
     ~AnimationManager();
-    void add_animation(std::string name, std::vector<std::string> image_list, std::vector<int> frames_per_image = {});
-    void start_new_animation(std::string name, std::string id, vec2<int> position, bool is_looping);
-    void remove_animation(std::string id);
+    void add_animation(const std::string& name, const std::string& image_list, const vec2<int>& sprite_dimensions, const std::vector<int>& frames_per_image = {});
+    void start_new_animation(const std::string& name, const std::string& id, const vec2<int>& position, bool is_looping);
+    SDL_Surface* get_animating_surface(const std::string& id);
+    void remove_animation(const std::string& id);
     void remove_all_animations();
     void tick();
     void draw(const vec2<int>& offset);

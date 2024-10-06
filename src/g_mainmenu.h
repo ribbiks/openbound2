@@ -12,7 +12,7 @@ private:
 public:
     G_MainMenu();
     ~G_MainMenu() override;
-    void update(Game* game, player_inputs* inputs, double frame_time) override;
-    void tick(Game* game, player_inputs* inputs) override;
+    void update(Game* game, PlayerInputs* inputs) override;
+    void tick(Game* game, PlayerInputs* inputs) override;
     void draw(Game* game) override;
 };

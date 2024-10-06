@@ -31,14 +31,14 @@ void Game::change_state(std::unique_ptr<GameState> new_state) {
     current_state = std::move(new_state);
 }
 
-void Game::update(player_inputs* inputs, double frame_time) {
+void Game::update(PlayerInputs* inputs, double frame_time) {
     camera->nudge_target(inputs->move_up, inputs->move_down, inputs->move_left, inputs->move_right, frame_time);
     camera->update(frame_time);
     cursor->update({inputs->mouse_x, inputs->mouse_y});
-    current_state->update(this, inputs, frame_time);
+    current_state->update(this, inputs);
 }
 
-void Game::tick(player_inputs* inputs){
+void Game::tick(PlayerInputs* inputs){
     cursor->tick();
     animation_manager->tick();
     current_state->tick(this, inputs);

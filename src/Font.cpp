@@ -40,8 +40,8 @@ Font::Font(const std::string& path, SDL_Color color, int scalar) :
             SDL_Surface* char_surface = SDL_CreateRGBSurface(0, char_rect.w, char_rect.h, 32, 0, 0, 0, 0);
             SDL_Rect floodfill = {0, 0, char_surface->w, char_surface->h};
             SDL_FillRect(char_surface, &floodfill, SDL_MapRGB(char_surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
-            
             SDL_BlitSurface(font_img, &char_rect, char_surface, nullptr);
+            
             if (scalar > 1) {
                 SDL_Surface* scaled_surface = SDL_CreateRGBSurface(0, char_rect.w * scalar, char_rect.h * scalar, 32, 0, 0, 0, 0);
                 SDL_BlitScaled(char_surface, nullptr, scaled_surface, nullptr);
@@ -49,7 +49,7 @@ Font::Font(const std::string& path, SDL_Color color, int scalar) :
                 char_surface = scaled_surface;
             }
 
-            char c = character_order[character_count];
+            char c = CHARACTER_ORDER[character_count];
             characters[c] = char_surface;
             char_width[c] = char_surface->w;
 
