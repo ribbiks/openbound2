@@ -23,6 +23,7 @@ public:
     ~WorldMap();
     vec2<int> get_map_size();
     vec2<int> get_start_pos();
+    vec2<float> get_scrolled_pos(const vec2<float>& position);
     std::vector<vec2<int>> pathfind(const vec2<int>& start_pos, const vec2<int>& end_pos);
     void tick();
     void draw(const vec2<int>& offset);

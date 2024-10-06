@@ -194,6 +194,10 @@ public:
         if (player_state == PlayerState::ARRIVED)
             player_state = PlayerState::IDLE;
         //
+        // nudge our position if we're on a conveyor
+        //
+        player_position = world_map->get_scrolled_pos(player_position);
+        //
         // decrement delay on incoming orders. if any are ready add them to queue
         //
         for (size_t i = 0; i < incoming_orders.size(); ++i) {

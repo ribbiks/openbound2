@@ -15,7 +15,9 @@ bool valid_player_position(const vec2<int>& position, const Array2D<bool>& wall_
     for (const auto& adj : ADJ_VALIDPOS) {
         vec2<int> v_adj = position + adj;
         vec2<int> v_map = {v_adj.x / GRIDSIZE, v_adj.y / GRIDSIZE};
-        if (wall_dat[v_map.x][v_map.y])
+        if (v_map.x < 0 || v_map.x >= wall_dat.width() ||
+            v_map.y < 0 || v_map.y >= wall_dat.height() || 
+            wall_dat[v_map.x][v_map.y])
             return false;
     }
     return true;

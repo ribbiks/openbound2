@@ -61,11 +61,31 @@ WorldMap::~WorldMap() {
 }
 
 vec2<int> WorldMap::get_map_size() {
-    return vec2<int>(GRIDSIZE*wall_dat.width(), GRIDSIZE*wall_dat.height());
+    return vec2<int>(GRIDSIZE * wall_dat.width(), GRIDSIZE * wall_dat.height());
 }
 
 vec2<int> WorldMap::get_start_pos() {
     return GRIDSIZE * player_start + vec2<int>({GRIDSIZE/2, GRIDSIZE/2});
+}
+
+vec2<float> WorldMap::get_scrolled_pos(const vec2<float>& position) {
+    vec2<float> map_position = {position.x / GRIDSIZE, position.y / GRIDSIZE};
+    vec2<float> scroll_xy = tile_manager->get_tile_scroll(tile_dat[static_cast<int>(map_position.x)][static_cast<int>(map_position.y)]);
+    // deal with floating point
+    if (std::abs(scroll_xy.x) < EPSILON)
+        scroll_xy.x = 0.0f;
+    if (std::abs(scroll_xy.y) < EPSILON)
+        scroll_xy.y = 0.0f;
+    if (std::abs(scroll_xy.x) > EPSILON || std::abs(scroll_xy.y) > EPSILON) {
+        // check if we have clearance to nudged position
+        vec2<float> goal_pos = position + scroll_xy;
+        vec2<float> goal_pos_map = {goal_pos.x / GRIDSIZE, goal_pos.y / GRIDSIZE};
+        if (line_of_sight_unit(map_position, goal_pos_map, wall_dat))
+            return goal_pos;
+        // scroll pushes us against a wall
+        // TODO
+    }
+    return position;
 }
 
 std::vector<vec2<int>> WorldMap::pathfind(const vec2<int>& start_pos, const vec2<int>& end_pos) {

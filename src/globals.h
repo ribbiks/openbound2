@@ -20,6 +20,8 @@ const float PLAYER_RADIUS_GRIDUNITS = PLAYER_RADIUS / F_GRIDSIZE;
 const float RADIAN_SCALAR = 57.2957795; // 180 / pi
 const float ANGLE_SCALAR  = 0.01745329; // pi / 180
 
+const float MAX_SCROLL_MAGNITUDE = static_cast<float>(GRIDSIZE);
+
 const SDL_Color FONT_LETTER_COL = {  0,   0,   0, 255};
 const SDL_Color FONT_DELIM_COL  = {127, 127, 127, 255};
 const SDL_Color TRANS_COL       = {255,   0, 255, 255};

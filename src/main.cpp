@@ -46,10 +46,10 @@ void main_loop() {
     accumulator = std::min(accumulator + frame_time, MAX_ACCUM);
 
     // DEBUGGING STUFF
-    if (current_tic == 200) {
-        game->animation_manager->add_animation("test_explosion", "assets/exp2_0.png", {64,64});
-        game->animation_manager->start_new_animation("test_explosion", "anim_id_1", {256,256}, true);
-    }
+    //if (current_tic == 200) {
+    //    game->animation_manager->add_animation("test_explosion", "assets/exp2_0.png", {64,64});
+    //    game->animation_manager->start_new_animation("test_explosion", "anim_id_1", {256,256}, true);
+    //}
 
     // updates that occur every frame (camera, mouse cursors)
     update_fps();
