@@ -12,14 +12,16 @@
 #include "globals.h"
 #include "misc_gfx.h"
 
-using json = nlohmann::json;
+extern SDL_Renderer* renderer;
 
 struct TileMetadata {
-    SDL_Surface* surface;
+    SDL_Texture* texture;
     bool is_wall;
     bool is_animated;
     vec2<float> scroll_parameters; // (magnitude, angle)
 };
+
+using json = nlohmann::json;
 
 class TileManager {
 private:
@@ -54,8 +56,11 @@ public:
             //
             // static tiles
             //
-            if (animated_tile_iscript.size() == 0)
-                all_tile_data.push_back({load_image(tile_image_filename), tile_is_wall, false, scroll_xy});
+            if (animated_tile_iscript.size() == 0) {
+                SDL_Surface* temp_surface = load_image(tile_image_filename);
+                all_tile_data.push_back({SDL_CreateTextureFromSurface(renderer, temp_surface), tile_is_wall, false, scroll_xy});
+                SDL_FreeSurface(temp_surface);
+            }
             //
             // animated tiles
             //
@@ -70,7 +75,7 @@ public:
 
     ~TileManager() {
         for(size_t i = 0; i < all_tile_data.size(); ++i)
-            SDL_FreeSurface(all_tile_data[i].surface);
+            SDL_DestroyTexture(all_tile_data[i].texture);
     }
 
     int get_number_of_loaded_tiles() {
@@ -89,14 +94,14 @@ public:
         return all_tile_data[i].scroll_parameters;
     }
 
-    SDL_Surface* get_tile_surface(size_t i) {
+    SDL_Texture* get_tile_texture(size_t i) {
         if (i >= all_tile_data.size())
             throw std::invalid_argument("Requesting invalid tile");
         // static tiles
         if (!all_tile_data[i].is_animated)
-            return all_tile_data[i].surface;
+            return all_tile_data[i].texture;
         // animated tiles
-        return animation_manager.get_animating_surface(std::to_string(i));
+        return animation_manager.get_animating_texture(std::to_string(i));
     }
 
     void tick() {

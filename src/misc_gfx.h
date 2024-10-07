@@ -11,7 +11,7 @@ extern SDL_Renderer* renderer;
 
 const int PF_NODE_RADIUS = 4; // width of pathfinding nodes (for drawing)
 
-SDL_Surface* load_image(const std::string& image_filename);
+SDL_Surface* load_image(const std::string& image_filename, bool colorkey = true);
 std::vector<SDL_Surface*> load_spritesheet(const std::string& image_filename, const vec2<int>& sprite_dimensions);
 SDL_Surface* rescale_surface(SDL_Surface* src, int new_width, int new_height);
 void draw_line(const Line& line, SDL_Color color);

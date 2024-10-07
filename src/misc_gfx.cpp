@@ -8,13 +8,14 @@
 #include "globals.h"
 #include "misc_gfx.h"
 
-SDL_Surface* load_image(const std::string& image_filename) {
+SDL_Surface* load_image(const std::string& image_filename, bool colorkey) {
     SDL_Surface* surface = IMG_Load(image_filename.c_str());
     if (surface == nullptr) {
         SDL_Log("Unable to load image %s! SDL_image Error: %s\n", image_filename.c_str(), IMG_GetError());
         return nullptr;
     }
-    SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
+    if (colorkey)
+        SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
     return surface;
 }
 
@@ -132,19 +133,6 @@ void draw_background_grid(const vec2<int>& offset) {
         else
             draw_line(line, GRID_MAJOR_COL);
     }
-}
-
-void draw_text(const std::string& text, int x, int y, Font* font) {
-    if (font == nullptr) {
-        return;
-    }
-    SDL_Surface* surface = font->render_text(text);
-    SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_Rect fps_rect = {x, y, surface->w, surface->h};
-    SDL_RenderCopy(renderer, texture, nullptr, &fps_rect);
-    SDL_FreeSurface(surface);
-    SDL_DestroyTexture(texture);
 }
 
 SDL_Surface* draw_ellipse(int width, int height, SDL_Color color) {

@@ -10,7 +10,8 @@
 extern SDL_Renderer* renderer;
 
 struct AnimationSequence {
-    std::vector<SDL_Surface*> frames;
+    std::vector<SDL_Texture*> frames;
+    std::vector<vec2<int>> sizes;
     std::vector<unsigned int> durations;
     std::vector<vec2<int>> offsets;
 };
@@ -33,7 +34,7 @@ public:
     ~AnimationManager();
     void add_animation(const std::string& name, const std::string& image_list, const vec2<int>& sprite_dimensions, const std::vector<int>& frames_per_image = {});
     void start_new_animation(const std::string& name, const std::string& id, const vec2<int>& position, bool is_looping);
-    SDL_Surface* get_animating_surface(const std::string& id);
+    SDL_Texture* get_animating_texture(const std::string& id);
     void remove_animation(const std::string& id);
     void remove_all_animations();
     void tick();

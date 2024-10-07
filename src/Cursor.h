@@ -18,9 +18,10 @@ private:
     int frame_click;
     int animation_tick_cursor;
     int animation_tick_click_animation;
-    std::vector<SDL_Surface*> surfaces_cursor;
-    std::vector<SDL_Surface*> surfaces_click;
-    std::vector<SDL_Surface*> surfaces_shiftclick;
+    std::vector<vec2<int>> cursor_sizes;
+    std::vector<SDL_Texture*> textures_cursor;
+    std::vector<SDL_Texture*> textures_click;
+    std::vector<SDL_Texture*> textures_shiftclick;
     vec2<int> click_animation_position;
     bool click_animation_is_queue;
 

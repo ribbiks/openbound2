@@ -17,8 +17,8 @@ SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
 bool quit = false;
 std::unique_ptr<Game> game;
-
 Font* fps_font = nullptr;
+PlayerInputs* inputs = nullptr;
 
 Uint32 frame_count, frame_time, prev_time = 0;
 float fps = 0.0f;
@@ -27,7 +27,11 @@ double accumulator = 0.0;
 double previous_update_time = 0.0;
 int current_tic = 0;
 
-PlayerInputs* inputs = nullptr;
+void set_game_globals() {
+    game = std::unique_ptr<Game>(new Game());
+    fps_font = new Font("assets/small_font.png", {255, 255, 255, 255}, 2);
+    inputs = new PlayerInputs;
+}
 
 void update_fps() {
     frame_count++;
@@ -78,28 +82,24 @@ void main_loop() {
     //
     game->draw();
     //
-    draw_text(fmt::format("FPS: {:.2f}", fps), 10, 10, fps_font);
-    draw_text(fmt::format("{},{}", inputs->mouse_x / GRIDSIZE, inputs->mouse_y / GRIDSIZE), 10, 30, fps_font);
-    draw_text(fmt::format("{}", current_tic), 10, 50, fps_font);
-    draw_text(fmt::format("{},{} {},{}", camera_pos.x, camera_pos.y, camera_tgt.x, camera_tgt.y), 10, 70, fps_font);
+    fps_font->draw_text(fmt::format("FPS: {:.2f}", fps), {10, 10});
+    fps_font->draw_text(fmt::format("{},{}", inputs->mouse_x / GRIDSIZE, inputs->mouse_y / GRIDSIZE), {10, 30});
+    fps_font->draw_text(fmt::format("{}", current_tic), {10, 50});
+    fps_font->draw_text(fmt::format("{},{} {},{}", camera_pos.x, camera_pos.y, camera_tgt.x, camera_tgt.y), {10, 70});
     //
     SDL_RenderPresent(renderer);
 }
 
 int main() {
     SDL_Init(SDL_INIT_VIDEO);
-    game = std::unique_ptr<Game>(new Game());
 
     bool vsync = false;
-
-    SDL_Color fps_text_color = {255, 255, 255, 255};
-    fps_font = new Font("assets/small_font.png", fps_text_color, 2);
-    inputs = new PlayerInputs;
 
     ///////////////////////////////////
     #ifdef __EMSCRIPTEN__ /////////////
     ///////////////////////////////////
     SDL_CreateWindowAndRenderer(RESOLUTION.x, RESOLUTION.y, 0, &window, &renderer);
+    set_game_globals();
     emscripten_set_main_loop(main_loop, 0, 1);
     //
     #else /////////////////////////////
@@ -109,6 +109,7 @@ int main() {
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     else
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    set_game_globals();
     while (!quit) {
         main_loop();
     }

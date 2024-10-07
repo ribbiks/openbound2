@@ -101,20 +101,18 @@ void WorldMap::tick() {
 
 void WorldMap::draw(const vec2<int>& offset) {
     // draw terrain
-    for (int i = 0; i < tile_dat.width(); ++i) {
-        for (int j = 0; j < tile_dat.height(); ++j) {
-            SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, tile_manager->get_tile_surface(tile_dat[i][j]));
-            if (texture == nullptr) {
-                SDL_Log("Unable to create texture! SDL Error: %s\n", SDL_GetError());
-                return;
-            }
+    int start_x = offset.x / GRIDSIZE;
+    int start_y = offset.y / GRIDSIZE;
+    int end_x = (offset.x + RESOLUTION.x) / GRIDSIZE + 1;
+    int end_y = (offset.y + RESOLUTION.y) / GRIDSIZE + 1;
+    for (int i = start_x; i < end_x && i < tile_dat.width(); ++i) {
+        for (int j = start_y; j < end_y && j < tile_dat.height(); ++j) {
             SDL_Rect rect = {GRIDSIZE * i - offset.x, GRIDSIZE * j - offset.y, GRIDSIZE, GRIDSIZE};
-            SDL_RenderCopy(renderer, texture, nullptr, &rect);
-            SDL_DestroyTexture(texture);
+            SDL_RenderCopy(renderer, tile_manager->get_tile_texture(tile_dat[i][j]), nullptr, &rect);
         }
     }
 
-    // draw impassable tiles
+    //// draw impassable tiles
     //for (int i = 0; i < wall_dat.width(); ++i) {
     //    for (int j = 0; j < wall_dat.height(); ++j) {
     //        if (wall_dat[i][j]) {

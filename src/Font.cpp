@@ -10,7 +10,7 @@ Font::Font(const std::string& path, SDL_Color color, int scalar) :
     spacing(scalar),
     char_height(0) {
 
-    SDL_Surface* font_img = load_image(path);
+    SDL_Surface* font_img = load_image(path, false);
 
     // recolor
     SDL_LockSurface(font_img);
@@ -50,8 +50,11 @@ Font::Font(const std::string& path, SDL_Color color, int scalar) :
             }
 
             char c = CHARACTER_ORDER[character_count];
-            characters[c] = char_surface;
             char_width[c] = char_surface->w;
+            char_height = std::max(char_height, char_surface->h);
+            SDL_SetColorKey(char_surface, SDL_TRUE, SDL_MapRGB(char_surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
+            char_textures[c] = SDL_CreateTextureFromSurface(renderer, char_surface);
+            SDL_FreeSurface(char_surface);
 
             character_count++;
             current_char_width = 0;
@@ -59,50 +62,24 @@ Font::Font(const std::string& path, SDL_Color color, int scalar) :
             current_char_width++;
         }
     }
-
-    char_height = characters['A']->h;
-    char_width[' '] = char_width['A'];
-
     SDL_FreeSurface(font_img);
+    char_width[' '] = char_width['A'];
 }
 
 Font::~Font() {
-    for (auto& pair : characters)
-        SDL_FreeSurface(pair.second);
+    for (auto& pair : char_textures)
+        SDL_DestroyTexture(pair.second);
 }
 
-SDL_Surface* Font::render_text(const std::string& text) {
-    if (text.empty())
-        return nullptr;
-
-    // calculate the total width of the text surface
-    int total_width = 0;
-    for (char c : text) {
-        if (char_width.find(c) != char_width.end()) {
-            total_width += char_width[c] + spacing;
-        } else if (c == ' ') {
-            total_width += char_width[' '] + spacing;
-        }
-    }
-    total_width -= spacing; // remove extra spacing after the last character
-
-    // create a surface to hold the entire text
-    SDL_Surface* text_surface = SDL_CreateRGBSurface(0, total_width, char_height, 32, 0, 0, 0, 0);
-    if (!text_surface)
-        return nullptr;
-    SDL_Rect floodfill = {0, 0, text_surface->w, text_surface->h};
-    SDL_FillRect(text_surface, &floodfill, SDL_MapRGB(text_surface->format, TRANS_COL.r, TRANS_COL.g, TRANS_COL.b));
-
+void Font::draw_text(const std::string& text, const vec2<int>& position) {
     int current_x = 0;
     for (char c : text) {
-        if (characters.find(c) != characters.end()) {
-            SDL_Rect dst_rect = {current_x, 0, char_width[c], char_height};
-            SDL_BlitSurface(characters[c], nullptr, text_surface, &dst_rect);
+        if (char_textures.find(c) != char_textures.end()) {
+            SDL_Rect rect = {current_x + position.x, position.y, char_width[c], char_height};
+            SDL_RenderCopy(renderer, char_textures[c], nullptr, &rect);
             current_x += char_width[c] + spacing;
         } else if (c == ' ') {
             current_x += char_width[' '] + spacing;
         }
     }
-
-    return text_surface;
 }
