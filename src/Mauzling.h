@@ -102,7 +102,7 @@ private:
                 upcoming_angs.push(current_angle);
             }
         }
-        else if (num_turn_frames == 1) {
+        else if (num_turn_frames == 1 && player_state != PlayerState::MOVING && player_state != PlayerState::TURNING) {
             if (std::abs(d_ang) <= TURN_SPEED)
                 upcoming_angs.push(g_ang);
             else {
@@ -196,7 +196,12 @@ public:
         //
         // nudge our position if we're on a conveyor
         //
-        player_position = world_map->get_scrolled_pos(player_position);
+        vec2<float> pos_scrolled = world_map->get_scrolled_pos(player_position);
+        vec2<float> dv = pos_scrolled - player_position;
+        player_position = pos_scrolled;
+        // if we're moving, also update our angle
+        if (player_state == PlayerState::MOVING && (std::abs(dv.x) > EPSILON || std::abs(dv.y) > EPSILON))
+            turns_we_need_to_do = get_turn_angles(player_position, order_queue.front().goal_coordinates, player_angle, order_queue.front().clicked_coordinates);
         //
         // decrement delay on incoming orders. if any are ready add them to queue
         //

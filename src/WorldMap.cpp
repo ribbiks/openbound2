@@ -77,13 +77,15 @@ vec2<float> WorldMap::get_scrolled_pos(const vec2<float>& position) {
     if (std::abs(scroll_xy.y) < EPSILON)
         scroll_xy.y = 0.0f;
     if (std::abs(scroll_xy.x) > EPSILON || std::abs(scroll_xy.y) > EPSILON) {
-        // check if we have clearance to nudged position
-        vec2<float> goal_pos = position + scroll_xy;
-        vec2<float> goal_pos_map = {goal_pos.x / GRIDSIZE, goal_pos.y / GRIDSIZE};
-        if (line_of_sight_unit(map_position, goal_pos_map, wall_dat))
-            return goal_pos;
-        // scroll pushes us against a wall
-        // TODO
+        // nudge towards destination
+        vec2<float> out_pos = position;
+        for (float scale_factor = 0.05f; scale_factor <= 1.0f + EPSILON; scale_factor += 0.05f) {
+            vec2<float> test_pos = (scale_factor * scroll_xy) + position;
+            if (!valid_player_position(test_pos, wall_dat))
+                break;
+            out_pos = test_pos;
+        }
+        return out_pos;
     }
     return position;
 }
