@@ -234,13 +234,13 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
         float x2 = static_cast<float>(start_pos.x) / F_GRIDSIZE;
         float y2 = static_cast<float>(start_pos.y) / F_GRIDSIZE;
         vec2<int> found_tile = NULL_VEC;
-        std::vector<vec2<int>> voxels = dda_grid_traversal(x1, y1, x2, y2);
-        for (size_t i = 0; i < voxels.size(); ++i) {
-            if (pf_data.tile_2_region_id[voxels[i].x][voxels[i].y] == start_region) {
-                found_tile = voxels[i];
-                break;
-            }
-        }
+        //std::vector<vec2<int>> voxels = dda_grid_traversal(x1, y1, x2, y2);
+        //for (size_t i = 0; i < voxels.size(); ++i) {
+        //    if (pf_data.tile_2_region_id[voxels[i].x][voxels[i].y] == start_region) {
+        //        found_tile = voxels[i];
+        //        break;
+        //    }
+        //}
         if (found_tile != NULL_VEC) {
             map_coords_end = found_tile;
             found_nearest_inbound_tile = true;
@@ -250,7 +250,8 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
             // if line drawing failed, lets do a bfs to find the nearest valid tile
             int width = wall_dat.width();
             int height = wall_dat.height();
-            Array2D<bool> visited(width, height, false); // this is inefficient
+            Array2D<bool> visited(width, height, false);
+            vec2<int> dv = end_pos - start_pos;
             std::queue<vec2<int>> queue;
             queue.push(map_coords_end);
             while (!queue.empty()) {
@@ -261,12 +262,12 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
                     break;
                 }
                 for (const auto& dir : MOVE_DIR) {
-                    vec2<int> next = current + dir;
-                    if (next.x >= 0 && next.x < width && next.y >= 0 && next.y < height &&
-                        !visited[next.x][next.y] &&
-                        (pf_data.tile_2_region_id[next.x][next.y] == -1 || pf_data.tile_2_region_id[next.x][next.y] == start_region)) {
-                        visited[next.x][next.y] = true;
-                        queue.push(next);
+                    if (dir.x * dv.x <= 0 && dir.y * dv.y <= 0) {
+                        vec2<int> next = current + dir;
+                        if (next.x >= 0 && next.x < width && next.y >= 0 && next.y < height && !visited[next.x][next.y]) {
+                            visited[next.x][next.y] = true;
+                            queue.push(next);
+                        }
                     }
                 }
             }

@@ -37,8 +37,7 @@ WorldMap::WorldMap(const std::string& map_filename) {
     wall_dat = Array2D<bool>(tile_dat.width(), tile_dat.height(), false);
     for (int i = 0; i < tile_dat.width(); ++i) {
         for (int j = 0; j < tile_dat.height(); ++j) {
-            if (tile_manager->get_tile_iswall(tile_dat[i][j]))
-                wall_dat[i][j] = true;
+            wall_dat[i][j] = tile_manager->get_tile_iswall(tile_dat[i][j]);
         }
     }
     std::vector<int> start_pos = loaded_data["start_pos"].get<std::vector<int>>();
@@ -88,6 +87,28 @@ vec2<float> WorldMap::get_scrolled_pos(const vec2<float>& position) {
         return out_pos;
     }
     return position;
+}
+
+void WorldMap::change_map_tiles(const std::vector<vec2<int>>& coord_list, const std::vector<int>& tileid_list) {
+    if (coord_list.size() != tileid_list.size())
+        throw std::invalid_argument("coord_list and tileid_list have different sizes");
+    bool any_wall_change = false;
+    for (size_t i = 0; i < coord_list.size(); ++i) {
+        vec2<int> coord = coord_list[i];
+        if (coord.x > 0 && coord.x < wall_dat.width() && coord.y > 0 && coord.y < wall_dat.height()) {
+            tile_dat[coord.x][coord.y] = tileid_list[i];
+            bool previous_wall = wall_dat[coord.x][coord.y];
+            wall_dat[coord.x][coord.y] = tile_manager->get_tile_iswall(tile_dat[coord.x][coord.y]);
+            if (wall_dat[coord.x][coord.y] != previous_wall)
+                any_wall_change = true;
+        }
+    }
+    if (any_wall_change) {
+        double start_time = SDL_GetTicks() / 1000.0;
+        pf_data = get_pathfinding_data(wall_dat);
+        double end_time = SDL_GetTicks() / 1000.0 - start_time;
+        printf("map tiles changed in %f seconds\n", end_time);
+    }
 }
 
 std::vector<vec2<int>> WorldMap::pathfind(const vec2<int>& start_pos, const vec2<int>& end_pos) {

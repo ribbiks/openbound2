@@ -17,6 +17,7 @@ private:
     Rect selection_box = {{0,0}, {0,0}};
     bool rightmouse_was_up = true;
     PlayerOrder* most_recent_order = nullptr;
+    int ingame_ticks = 0;
 
 public:
     G_Bounding(Game* game, const std::string& map_filename);
