@@ -39,10 +39,10 @@ static const vec2<float> ADJ_LOS_UNIT[] = {{-(PLAYER_RADIUS_GRIDUNITS - EPSILON)
                                            { (PLAYER_RADIUS_GRIDUNITS - EPSILON), -(PLAYER_RADIUS_GRIDUNITS - EPSILON)},
                                            { (PLAYER_RADIUS_GRIDUNITS - EPSILON),  (PLAYER_RADIUS_GRIDUNITS - EPSILON)}};
 
-static const vec2<float> ADJ_VALIDPOS[] = {{-PLAYER_RADIUS, -PLAYER_RADIUS},
-                                           {-PLAYER_RADIUS,  PLAYER_RADIUS},
-                                           { PLAYER_RADIUS, -PLAYER_RADIUS},
-                                           { PLAYER_RADIUS,  PLAYER_RADIUS}};
+static const vec2<float> ADJ_VALIDPOS[] = {{-(PLAYER_RADIUS - EPSILON), -(PLAYER_RADIUS - EPSILON)},
+                                           {-(PLAYER_RADIUS - EPSILON),  (PLAYER_RADIUS - EPSILON)},
+                                           { (PLAYER_RADIUS - EPSILON), -(PLAYER_RADIUS - EPSILON)},
+                                           { (PLAYER_RADIUS - EPSILON),  (PLAYER_RADIUS - EPSILON)}};
 
 static const vec2<int> MOVE_DIR[] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 

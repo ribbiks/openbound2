@@ -288,12 +288,12 @@ public:
                         float dv_length = dv.length();
                         float move_amount = get_current_speed();
                         if (dv_length <= move_amount) {
-                            player_position = fgoal;
+                            player_position = world_map->get_move_pos(player_position, fgoal);
                             order_queue.pop();
                             player_state = PlayerState::ARRIVED;
                         }
                         else
-                            player_position += (move_amount / dv_length) * dv;
+                            player_position = world_map->get_move_pos(player_position, player_position + (move_amount / dv_length) * dv);
                         increment_iscript();
                     }
                 }

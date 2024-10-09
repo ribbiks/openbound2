@@ -224,7 +224,11 @@ std::vector<vec2<int>> get_pathfinding_waypoints(const vec2<int>& start_pos,
     vec2<int> map_coords_end = {end_pos.x / GRIDSIZE, end_pos.y / GRIDSIZE};       // (cx,cy)
     int start_region = pf_data.tile_2_region_id[map_coords_start.x][map_coords_start.y];
     int end_region = pf_data.tile_2_region_id[map_coords_end.x][map_coords_end.y];
-    //
+
+    // if we're stuck in a wall we're not moving
+    if (start_region < 0)
+        return waypoints;
+
     bool found_nearest_inbound_tile = false;
     if (start_region != end_region) {
         // draw a line from end_pos to click_pos, looking for a valid destination tile along the way

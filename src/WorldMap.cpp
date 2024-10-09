@@ -67,6 +67,16 @@ vec2<int> WorldMap::get_start_pos() {
     return GRIDSIZE * player_start + vec2<int>({GRIDSIZE/2, GRIDSIZE/2});
 }
 
+vec2<float> WorldMap::get_move_pos(const vec2<float>& position, const vec2<float>& goal_position) {
+    vec2<float> dv = goal_position - position;
+    for (float scale_factor = 1.00f; scale_factor > EPSILON; scale_factor -= 0.05f) {
+        vec2<float> test_pos = (scale_factor * dv) + position;
+        if (valid_player_position(test_pos, wall_dat))
+            return test_pos;
+    }
+    return position;
+}
+
 vec2<float> WorldMap::get_scrolled_pos(const vec2<float>& position) {
     vec2<float> map_position = {position.x / GRIDSIZE, position.y / GRIDSIZE};
     vec2<float> scroll_xy = tile_manager->get_tile_scroll(tile_dat[static_cast<int>(map_position.x)][static_cast<int>(map_position.y)]);

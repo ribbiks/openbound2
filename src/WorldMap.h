@@ -23,6 +23,7 @@ public:
     ~WorldMap();
     vec2<int> get_map_size();
     vec2<int> get_start_pos();
+    vec2<float> get_move_pos(const vec2<float>& position, const vec2<float>& goal_position);
     vec2<float> get_scrolled_pos(const vec2<float>& position);
     void change_map_tiles(const std::vector<vec2<int>>& coord_list, const std::vector<int>& tileid_list);
     std::vector<vec2<int>> pathfind(const vec2<int>& start_pos, const vec2<int>& end_pos);
