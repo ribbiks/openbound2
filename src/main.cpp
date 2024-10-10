@@ -83,7 +83,7 @@ void main_loop() {
     game->draw();
     //
     fps_font->draw_text(fmt::format("FPS: {:.2f}", fps), {10, 10});
-    fps_font->draw_text(fmt::format("{},{}", inputs->mouse_x / GRIDSIZE, inputs->mouse_y / GRIDSIZE), {10, 30});
+    fps_font->draw_text(fmt::format("{},{} ({},{})", inputs->mouse_x, inputs->mouse_y, inputs->mouse_x / GRIDSIZE, inputs->mouse_y / GRIDSIZE), {10, 30});
     fps_font->draw_text(fmt::format("{}", current_tic), {10, 50});
     fps_font->draw_text(fmt::format("{},{} {},{}", camera_pos.x, camera_pos.y, camera_tgt.x, camera_tgt.y), {10, 70});
     //

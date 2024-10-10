@@ -193,15 +193,17 @@ public:
             reset_iscript();
         if (player_state == PlayerState::ARRIVED)
             player_state = PlayerState::IDLE;
+
         //
         // nudge our position if we're on a conveyor
         //
         vec2<float> pos_scrolled = world_map->get_scrolled_pos(player_position);
-        vec2<float> dv = pos_scrolled - player_position;
+        vec2<float> d_scroll = pos_scrolled - player_position;
         player_position = pos_scrolled;
         // if we're moving, also update our angle
-        if (player_state == PlayerState::MOVING && (std::abs(dv.x) > EPSILON || std::abs(dv.y) > EPSILON))
+        if (player_state == PlayerState::MOVING && (std::abs(d_scroll.x) > EPSILON || std::abs(d_scroll.y) > EPSILON))
             turns_we_need_to_do = get_turn_angles(player_position, order_queue.front().goal_coordinates, player_angle, order_queue.front().clicked_coordinates);
+
         //
         // decrement delay on incoming orders. if any are ready add them to queue
         //
@@ -218,6 +220,7 @@ public:
             }
         }
         incoming_orders.erase(std::remove_if(incoming_orders.begin(), incoming_orders.end(), [](PlayerOrder n) { return n.current_delay <= 0; }), incoming_orders.end());
+
         //
         // act out our current order if we have one
         //
@@ -292,8 +295,15 @@ public:
                             order_queue.pop();
                             player_state = PlayerState::ARRIVED;
                         }
-                        else
-                            player_position = world_map->get_move_pos(player_position, player_position + (move_amount / dv_length) * dv);
+                        else {
+                            vec2<float> scaled_goal_position = player_position + (move_amount / dv_length) * dv;
+                            vec2<float> bounded_position = world_map->get_move_pos(player_position, scaled_goal_position);
+                            player_position = bounded_position;
+                            // if bounded_position is not where we wanted to go, that means we hit a wall and need to stop
+                            vec2<float> dv2 = scaled_goal_position - bounded_position;
+                            if (std::abs(dv2.x) > EPSILON || std::abs(dv2.y) > EPSILON)
+                                player_state = PlayerState::ARRIVED;
+                        }
                         increment_iscript();
                     }
                 }

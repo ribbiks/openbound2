@@ -73,19 +73,19 @@ void G_Bounding::tick(Game* game, PlayerInputs* inputs) {
         test_tiles.push_back(0);
         world_map->change_map_tiles(test_coords, test_tiles);
     }
-    if ((ingame_ticks + 50) % 100 == 0) {
-        std::vector<vec2<int>> test_coords;
-        std::vector<int> test_tiles;
-        test_coords.push_back({25,28});
-        test_coords.push_back({26,28});
-        test_coords.push_back({25,29});
-        test_coords.push_back({26,29});
-        test_tiles.push_back(1);
-        test_tiles.push_back(1);
-        test_tiles.push_back(1);
-        test_tiles.push_back(1);
-        world_map->change_map_tiles(test_coords, test_tiles);
-    }
+    //if ((ingame_ticks + 50) % 100 == 0) {
+    //    std::vector<vec2<int>> test_coords;
+    //    std::vector<int> test_tiles;
+    //    test_coords.push_back({25,28});
+    //    test_coords.push_back({26,28});
+    //    test_coords.push_back({25,29});
+    //    test_coords.push_back({26,29});
+    //    test_tiles.push_back(1);
+    //    test_tiles.push_back(1);
+    //    test_tiles.push_back(1);
+    //    test_tiles.push_back(1);
+    //    world_map->change_map_tiles(test_coords, test_tiles);
+    //}
     //
     world_map->tick();
     //

@@ -19,11 +19,9 @@ CXXFLAGS := -std=c++11 -O2 -Wall -Wextra $(shell sdl2-config --cflags) $(shell p
 EMXXFLAGS := -std=c++11 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='["png"]' --preload-file assets --preload-file maps -Ithird-party -lfmt -Llib/wasm
 LDFLAGS := $(shell sdl2-config --libs) $(shell pkg-config --libs SDL2_image) -lfmt -L$(LIB_PATH)
 
-# include and library directories
+# sources and objects
 SRC_DIR := src
 OBJ_DIR := obj
-
-# sources and objects
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 OBJS := $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
