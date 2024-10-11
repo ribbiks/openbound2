@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <stdexcept>
+#include <unordered_map>
 #include <vector>
 
 #include <nlohmann/json.hpp>
@@ -10,15 +11,26 @@
 #include "geometry.h"
 #include "globals.h"
 #include "misc_gfx.h"
+#include "Obstacle.h"
 #include "pathfinding.h"
 #include "Vec2.h"
 
 using json = nlohmann::json;
 
 WorldMap::WorldMap(const std::string& map_filename) {
-    // load map from json
+
     std::ifstream input_file(map_filename);
-    json loaded_data = json::parse(input_file);
+    json loaded_data;
+    try {
+        loaded_data = json::parse(input_file);
+    }
+    catch (json::parse_error& e) {
+        throw std::invalid_argument("Could not parse map json");
+    }
+
+    //
+    // load map data
+    //
 
     map_name = loaded_data["map_name"];
     int map_width = loaded_data["map_width"];
@@ -52,6 +64,57 @@ WorldMap::WorldMap(const std::string& map_filename) {
     pf_data = get_pathfinding_data(wall_dat);
     double end_time = SDL_GetTicks() / 1000.0 - start_time;
     printf("map processed in %f seconds\n", end_time);
+
+    //
+    // parse obstacles
+    //
+
+    for (json::iterator it = loaded_data.begin(); it != loaded_data.end(); ++it) {
+        const std::string& key = it.key();
+        const json& value = it.value();
+        if (key.substr(0,9) == "obstacle_") {
+            try {
+                int obnum = std::stoi(key.substr(9));
+                std::vector<int> startbox = value["startbox"].get<std::vector<int>>();
+                std::vector<int> endbox = value["endbox"].get<std::vector<int>>();
+                std::vector<int> revive = value["revive"].get<std::vector<int>>();
+                int action_moveplayer = value["action_moveplayer"];
+                int action_addlives = value["action_addlives"];
+                std::string action_changemusic = value["action_changemusic"];
+                printf("BAWRRR [%i]: (%i,%i,%i,%i)\n", obnum, startbox[0], startbox[1], startbox[2], startbox[3]);
+                //
+                std::vector<Rect> locations;
+                int current_loc_num = 1;
+                while (value.contains("loc_" + std::to_string(current_loc_num))) {
+                    printf("has loc_%i\n", current_loc_num);
+                    // left top width height
+                    std::vector<int> loc = value["loc_" + std::to_string(current_loc_num)].get<std::vector<int>>();
+                    if (loc.size() != 4)
+                        throw std::invalid_argument("Invalid loc");
+                    locations.push_back({vec2<int>(loc[0], loc[1]), vec2<int>(loc[2], loc[3])});
+                    current_loc_num += 1;
+                }
+                //
+                std::vector<ExplosionCount> explosions;
+                int current_exp_num = 1;
+                while (value.contains("exp_" + std::to_string(current_exp_num))) {
+                    printf("has exp_%i\n", current_exp_num);
+                    // loc_list unit_list delay
+                    const json& exp = value["exp_" + std::to_string(current_exp_num)];
+                    if (!exp.is_array() || exp.size() != 3)
+                        throw std::invalid_argument("Invalid exp");
+                    std::vector<int> loc_list = exp[0].get<std::vector<int>>();
+                    std::vector<std::string> unit_list = exp[1].get<std::vector<std::string>>();
+                    int delay = exp[2];
+                    explosions.push_back({loc_list, unit_list, delay});
+                    current_exp_num += 1;
+                }
+            }
+            catch (const std::runtime_error& e) {
+                throw std::invalid_argument("Error parsing obstacle data");
+            }
+        }
+    }
 }
 
 WorldMap::~WorldMap() {
