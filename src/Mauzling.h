@@ -127,7 +127,7 @@ private:
     }
 
 public:
-    Mauzling(const vec2<float>& pos, std::string image_filename) :
+    Mauzling(const vec2<float>& pos, const std::string& image_filename) :
         player_position(pos),
         player_angle(angle_clamp(0.0f)),
         player_radius(PLAYER_RADIUS),
@@ -375,7 +375,7 @@ public:
             SDL_RenderCopyEx(renderer, texture, nullptr, &rect, -player_angle, nullptr, SDL_FLIP_NONE);
             SDL_DestroyTexture(texture);
             //
-            draw_rect(rect, UNIT_HITBOX);
+            draw_rect(rect, UNIT_HITBOX_COL);
         }
     }
 };

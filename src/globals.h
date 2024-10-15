@@ -35,4 +35,9 @@ const SDL_Color GRID_MAJOR_COL = {36, 36, 36, 255};
 
 const SDL_Color SELECTION_BOX_COL = { 50, 200,  50, 255};
 const SDL_Color UNIT_ELLIPSE_COL  = { 50, 200,  50, 255};
-const SDL_Color UNIT_HITBOX       = {200, 200, 100, 255};
+const SDL_Color UNIT_HITBOX_COL   = {200, 200, 100, 255};
+
+const SDL_Color OB_STARTBOX_COL = {100, 250, 100, 127};
+const SDL_Color OB_ENDBOX_COL   = {250, 100, 100, 127};
+const SDL_Color OB_REVIVE_COL   = {220, 220, 220, 127};
+const SDL_Color OB_LOC_COL      = {150, 150, 150, 127};

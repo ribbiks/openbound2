@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <stdexcept>
-#include <unordered_map>
 #include <vector>
 
 #include <nlohmann/json.hpp>
@@ -11,7 +10,6 @@
 #include "geometry.h"
 #include "globals.h"
 #include "misc_gfx.h"
-#include "Obstacle.h"
 #include "pathfinding.h"
 #include "Vec2.h"
 
@@ -69,51 +67,69 @@ WorldMap::WorldMap(const std::string& map_filename) {
     // parse obstacles
     //
 
-    for (json::iterator it = loaded_data.begin(); it != loaded_data.end(); ++it) {
-        const std::string& key = it.key();
-        const json& value = it.value();
-        if (key.substr(0,9) == "obstacle_") {
-            try {
-                int obnum = std::stoi(key.substr(9));
-                std::vector<int> startbox = value["startbox"].get<std::vector<int>>();
-                std::vector<int> endbox = value["endbox"].get<std::vector<int>>();
-                std::vector<int> revive = value["revive"].get<std::vector<int>>();
-                int action_moveplayer = value["action_moveplayer"];
-                int action_addlives = value["action_addlives"];
-                std::string action_changemusic = value["action_changemusic"];
-                printf("BAWRRR [%i]: (%i,%i,%i,%i)\n", obnum, startbox[0], startbox[1], startbox[2], startbox[3]);
-                //
-                std::vector<Rect> locations;
-                int current_loc_num = 1;
-                while (value.contains("loc_" + std::to_string(current_loc_num))) {
-                    printf("has loc_%i\n", current_loc_num);
-                    // left top width height
-                    std::vector<int> loc = value["loc_" + std::to_string(current_loc_num)].get<std::vector<int>>();
-                    if (loc.size() != 4)
-                        throw std::invalid_argument("Invalid loc");
-                    locations.push_back({vec2<int>(loc[0], loc[1]), vec2<int>(loc[2], loc[3])});
-                    current_loc_num += 1;
-                }
-                //
-                std::vector<ExplosionCount> explosions;
-                int current_exp_num = 1;
-                while (value.contains("exp_" + std::to_string(current_exp_num))) {
-                    printf("has exp_%i\n", current_exp_num);
-                    // loc_list unit_list delay
-                    const json& exp = value["exp_" + std::to_string(current_exp_num)];
-                    if (!exp.is_array() || exp.size() != 3)
-                        throw std::invalid_argument("Invalid exp");
-                    std::vector<int> loc_list = exp[0].get<std::vector<int>>();
-                    std::vector<std::string> unit_list = exp[1].get<std::vector<std::string>>();
-                    int delay = exp[2];
-                    explosions.push_back({loc_list, unit_list, delay});
-                    current_exp_num += 1;
-                }
+    int current_ob_num = 1;
+    while (loaded_data.contains("obstacle_" + std::to_string(current_ob_num))) {
+        const json& value = loaded_data["obstacle_" + std::to_string(current_ob_num)];
+        try {
+            std::vector<int> startbox = value["startbox"].get<std::vector<int>>();
+            if (startbox.size() != 4)
+                throw std::invalid_argument("Invalid startbox");
+            Rect startbox_rect = {vec2<int>(startbox[0], startbox[1]), vec2<int>(startbox[2], startbox[3])};
+            //
+            std::vector<int> endbox = value["endbox"].get<std::vector<int>>();
+            if (endbox.size() != 4)
+                throw std::invalid_argument("Invalid endbox");
+            Rect endbox_rect = {vec2<int>(endbox[0], endbox[1]), vec2<int>(endbox[2], endbox[3])};
+            //
+            std::vector<int> revive = value["revive"].get<std::vector<int>>();
+            if (revive.size() != 2)
+                throw std::invalid_argument("Invalid revive");
+            vec2<int> revive_vec = {revive[0], revive[1]};
+            //
+            int int_moveplayer = value["action_moveplayer"];
+            bool action_moveplayer = int_moveplayer > 0;
+            int action_addlives = value["action_addlives"];
+            std::string action_changemusic = value["action_changemusic"];
+            //
+            std::vector<Rect> locations;
+            int current_loc_num = 1;
+            while (value.contains("loc_" + std::to_string(current_loc_num))) {
+                // left top width height
+                std::vector<int> loc = value["loc_" + std::to_string(current_loc_num)].get<std::vector<int>>();
+                if (loc.size() != 4)
+                    throw std::invalid_argument("Invalid loc");
+                locations.push_back({vec2<int>(loc[0], loc[1]), vec2<int>(loc[2], loc[3])});
+                current_loc_num += 1;
             }
-            catch (const std::runtime_error& e) {
-                throw std::invalid_argument("Error parsing obstacle data");
+            //
+            std::vector<ExplosionCount> explosions;
+            int current_exp_num = 1;
+            while (value.contains("exp_" + std::to_string(current_exp_num))) {
+                // loc_list unit_list delay
+                const json& exp = value["exp_" + std::to_string(current_exp_num)];
+                if (!exp.is_array() || exp.size() != 3)
+                    throw std::invalid_argument("Invalid exp");
+                std::vector<int> loc_list = exp[0].get<std::vector<int>>();
+                std::vector<std::string> unit_list = exp[1].get<std::vector<std::string>>();
+                int delay = exp[2];
+                explosions.push_back({loc_list, unit_list, delay});
+                current_exp_num += 1;
             }
+            //
+            obstacles.push_back(Obstacle(current_ob_num,
+                                         startbox_rect,
+                                         endbox_rect,
+                                         revive_vec,
+                                         action_moveplayer,
+                                         action_addlives,
+                                         action_changemusic,
+                                         locations,
+                                         explosions));
         }
+        catch (const std::runtime_error& e) {
+            throw std::invalid_argument("Error parsing obstacle data");
+        }
+        current_ob_num += 1;
     }
 }
 
@@ -184,6 +200,12 @@ void WorldMap::change_map_tiles(const std::vector<vec2<int>>& coord_list, const 
     }
 }
 
+void WorldMap::set_current_obstacle(int obnum) {
+    int num_obs = obstacles.size();
+    if (obnum < num_obs)
+        currently_active_ob = obnum;
+}
+
 std::vector<vec2<int>> WorldMap::pathfind(const vec2<int>& start_pos, const vec2<int>& end_pos) {
     vec2<int> map_size = get_map_size() - vec2<int>(1,1);
     vec2<int> start_pos_bounded = {value_clamp(start_pos.x, 0, map_size.x), value_clamp(start_pos.y, 0, map_size.y)};
@@ -238,5 +260,10 @@ void WorldMap::draw(const vec2<int>& offset) {
             my_rect.position -= offset;
             draw_rect(my_rect, PATH_NODE_COL, true);
         }
+    }
+
+    // draw current obstacle
+    if (currently_active_ob >= 0) {
+        obstacles[currently_active_ob].draw(offset);
     }
 }

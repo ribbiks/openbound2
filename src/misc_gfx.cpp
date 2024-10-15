@@ -93,11 +93,15 @@ void draw_rect(const Rect& rect, SDL_Color color, bool filled) {
 }
 
 void draw_rect(const SDL_Rect& sdl_rect, SDL_Color color, bool filled) {
+    if (color.a < 255)
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     if (filled)
         SDL_RenderFillRect(renderer, &sdl_rect);
     else
         SDL_RenderDrawRect(renderer, &sdl_rect);
+    if (color.a < 255)
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
 
 void draw_thick_rect(const Rect& rect, SDL_Color color, int thickness) {
