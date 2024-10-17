@@ -1,6 +1,9 @@
 #pragma once
 #include <string>
+#include <unordered_map>
 #include <vector>
+
+#include <SDL.h>
 
 #include "geometry.h"
 #include "globals.h"
@@ -8,6 +11,9 @@
 #include "Vec2.h"
 
 extern SDL_Renderer* renderer;
+extern std::unordered_map<std::string, Font*> fonts;
+
+static const int REVIVE_RADIUS = 4; // width of revive position (for drawing)
 
 struct ExplosionCount {
     std::vector<int> locs;
@@ -63,5 +69,19 @@ public:
         my_rect = ob_endbox;
         my_rect.position -= offset;
         draw_rect(my_rect, OB_ENDBOX_COL, true);
+
+        // revive
+        my_rect = {ob_revive - vec2<int>(REVIVE_RADIUS, REVIVE_RADIUS), {2 * REVIVE_RADIUS, 2 * REVIVE_RADIUS}};
+        my_rect.position -= offset;
+        draw_rect(my_rect, OB_REVIVE_COL, true);
+
+        // locs
+        for (size_t i = 0; i < ob_locations.size(); ++i) {
+            std::string loc_string = std::to_string(ob_num) + "-" + std::to_string(i+1);
+            my_rect = ob_locations[i];
+            my_rect.position -= offset;
+            draw_rect(my_rect, OB_LOC_COL, true);
+            fonts["tiny_black"]->draw_text(loc_string, my_rect.position + vec2<int>(2,2));
+        }
     }
 };

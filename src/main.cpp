@@ -3,8 +3,11 @@
 #endif
 
 #include <memory>
-#include <SDL.h>
+#include <string>
+#include <unordered_map>
+
 #include <fmt/format.h>
+#include <SDL.h>
 
 #include "Font.h"
 #include "globals.h"
@@ -15,12 +18,15 @@
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
-bool quit = false;
-std::unique_ptr<Game> game;
-Font* fps_font = nullptr;
 PlayerInputs* inputs = nullptr;
+std::unique_ptr<Game> game;
+bool quit = false;
 
-Uint32 frame_count, frame_time, prev_time = 0;
+std::unordered_map<std::string, Font*> fonts;
+
+Uint32 frame_count = 0;
+Uint32 frame_time = 0;
+Uint32 prev_time = 0;
 float fps = 0.0f;
 double current_time = 0.0;
 double accumulator = 0.0;
@@ -29,8 +35,25 @@ int current_tic = 0;
 
 void set_game_globals() {
     game = std::unique_ptr<Game>(new Game());
-    fps_font = new Font("assets/small_font.png", {255, 255, 255, 255}, 2);
     inputs = new PlayerInputs;
+    inputs->key_space = false;
+    inputs->key_enter = false;
+    inputs->key_shift = false;
+    inputs->key_escape = false;
+    fonts["tiny_white"]  = new Font("assets/small_font.png", {255, 255, 255, 255}, 1);
+    fonts["small_white"] = new Font("assets/small_font.png", {255, 255, 255, 255}, 2);
+    fonts["tiny_black"]  = new Font("assets/small_font.png", {  0,   0,   0, 255}, 1);
+    fonts["small_black"] = new Font("assets/small_font.png", {  0,   0,   0, 255}, 2);
+}
+
+void clear_game_globals() {
+    delete inputs;
+    inputs = nullptr;
+    for (auto& pair : fonts) {
+        delete pair.second;
+        pair.second = nullptr;
+    }
+    fonts.clear();
 }
 
 void update_fps() {
@@ -82,10 +105,10 @@ void main_loop() {
     //
     game->draw();
     //
-    fps_font->draw_text(fmt::format("FPS: {:.2f}", fps), {10, 10});
-    fps_font->draw_text(fmt::format("{},{} ({},{})", inputs->mouse_x, inputs->mouse_y, inputs->mouse_x / GRIDSIZE, inputs->mouse_y / GRIDSIZE), {10, 30});
-    fps_font->draw_text(fmt::format("{}", current_tic), {10, 50});
-    fps_font->draw_text(fmt::format("{},{} {},{}", camera_pos.x, camera_pos.y, camera_tgt.x, camera_tgt.y), {10, 70});
+    fonts["small_white"]->draw_text(fmt::format("FPS: {:.2f}", fps), {10, 10});
+    fonts["small_white"]->draw_text(fmt::format("{},{} ({},{})", inputs->mouse_x, inputs->mouse_y, inputs->mouse_x / GRIDSIZE, inputs->mouse_y / GRIDSIZE), {10, 30});
+    fonts["small_white"]->draw_text(fmt::format("{}", current_tic), {10, 50});
+    fonts["small_white"]->draw_text(fmt::format("{},{} {},{}", camera_pos.x, camera_pos.y, camera_tgt.x, camera_tgt.y), {10, 70});
     //
     SDL_RenderPresent(renderer);
 }
@@ -117,11 +140,7 @@ int main() {
     #endif ////////////////////////////
     ///////////////////////////////////
 
-    delete fps_font;
-    fps_font = nullptr;
-
-    delete inputs;
-    inputs = nullptr;
+    clear_game_globals();
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

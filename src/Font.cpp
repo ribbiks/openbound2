@@ -6,6 +6,8 @@
 #include "misc_gfx.h"
 #include "globals.h"
 
+Font::Font() : spacing(1), char_height(0) {}
+
 Font::Font(const std::string& path, SDL_Color color, int scalar) :
     spacing(scalar),
     char_height(0) {

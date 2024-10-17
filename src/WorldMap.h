@@ -12,6 +12,8 @@
 
 extern SDL_Renderer* renderer;
 
+static const int PF_NODE_RADIUS = 4; // width of pathfinding nodes (for drawing)
+
 class WorldMap {
 private:
     PathfindingData pf_data;

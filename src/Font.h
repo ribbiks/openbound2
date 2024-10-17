@@ -18,6 +18,7 @@ private:
     std::unordered_map<char, int> char_width;
 
 public:
+    Font();
     Font(const std::string& path, SDL_Color color, int scalar = 1);
     ~Font();
     void draw_text(const std::string& text, const vec2<int>& position);
