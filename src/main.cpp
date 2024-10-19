@@ -72,12 +72,6 @@ void main_loop() {
     current_time = new_time;
     accumulator = std::min(accumulator + frame_time, MAX_ACCUM);
 
-    // DEBUGGING STUFF
-    //if (current_tic == 200) {
-    //    game->animation_manager->add_animation("test_explosion", "assets/exp2_0.png", {64,64});
-    //    game->animation_manager->start_new_animation("test_explosion", "anim_id_1", {256,256}, true);
-    //}
-
     // updates that occur every frame (camera, mouse cursors)
     update_fps();
     get_inputs(inputs);
@@ -90,11 +84,17 @@ void main_loop() {
     // updates that occur every game tick
     while (accumulator >= DT) {
         //
-        game->tick(inputs);
+        game->tick();
         //
         previous_update_time = current_time;
         accumulator -= DT;
         current_tic++;
+        //
+        // DEBUGGING STUFF
+        ////if (current_tic == 100) {
+        ////    game->animation_manager.add_animation("test", "assets/M484explosionset1.png", {34,34});
+        ////    game->animation_manager.start_new_animation("test", "anim_id_1", {128,384}, true);
+        ////}
     }
 
     // drawing

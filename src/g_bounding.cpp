@@ -56,7 +56,8 @@ void G_Bounding::update(Game* game, PlayerInputs* inputs) {
     }
 }
 
-void G_Bounding::tick(Game* game, PlayerInputs* inputs) {
+std::vector<Event> G_Bounding::tick(Game* game) {
+    std::vector<Event> out_events;
     //
     // DEBUG / TESTING STUFF
     //
@@ -89,7 +90,9 @@ void G_Bounding::tick(Game* game, PlayerInputs* inputs) {
         world_map->set_current_obstacle(-1);
     }
     //
-    world_map->tick();
+    std::vector<Event> worldmap_events = world_map->tick();
+    for (auto event : worldmap_events)
+        out_events.push_back(event);
     //
     // issue order
     //
@@ -103,13 +106,15 @@ void G_Bounding::tick(Game* game, PlayerInputs* inputs) {
     player->tick(world_map);
     //
     ingame_ticks += 1;
+
+    return out_events;
 }
 
 void G_Bounding::draw(Game* game) {
     vec2<int> camera_pos = game->get_camera_pos();
     world_map->draw(camera_pos);
     player->draw(camera_pos);
-    game->animation_manager->draw(camera_pos); // draw sprites on top of player, but not on top of selection box
+    game->animation_manager.draw(camera_pos); // draw sprites on top of player, but not on top of selection box
     if (drawing_box) {
         Rect offset_box = {selection_box.position - camera_pos, selection_box.size};
         //draw_rect(offset_box, SELECTION_BOX_COL);

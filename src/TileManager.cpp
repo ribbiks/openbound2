@@ -83,7 +83,8 @@ SDL_Texture* TileManager::get_tile_texture(size_t i) {
     if (!all_tile_data[i].is_animated)
         return all_tile_data[i].texture;
     // animated tiles
-    return animation_manager.get_animating_texture(std::to_string(i));
+    std::string animated_tile_name = std::to_string(i);
+    return animation_manager.get_animating_texture(animated_tile_name);
 }
 
 void TileManager::tick() {

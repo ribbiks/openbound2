@@ -1,7 +1,17 @@
 #pragma once
+#include <string>
+
 #include <SDL.h>
 
 #include "Vec2.h"
+
+// general purpose struct for event messages
+struct Event {
+    std::string type;
+    std::string data_str;
+    std::string data_str_2;
+    vec2<int> data_vec;
+};
 
 const double TICRATE = 23.8095;
 const int MAX_UPDATE_FRAMES = 8;

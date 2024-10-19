@@ -13,6 +13,6 @@ public:
     G_MainMenu();
     ~G_MainMenu() override;
     void update(Game* game, PlayerInputs* inputs) override;
-    void tick(Game* game, PlayerInputs* inputs) override;
+    std::vector<Event> tick(Game* game) override;
     void draw(Game* game) override;
 };

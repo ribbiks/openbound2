@@ -202,8 +202,9 @@ void WorldMap::change_map_tiles(const std::vector<vec2<int>>& coord_list, const 
 
 void WorldMap::set_current_obstacle(int obnum) {
     int num_obs = obstacles.size();
-    if (obnum < num_obs)
-        currently_active_ob = obnum;
+    currently_active_ob = obnum;
+    if (currently_active_ob >= 0 && currently_active_ob < num_obs)
+        obstacles[currently_active_ob].reset();
 }
 
 std::vector<vec2<int>> WorldMap::pathfind(const vec2<int>& start_pos, const vec2<int>& end_pos) {
@@ -213,8 +214,16 @@ std::vector<vec2<int>> WorldMap::pathfind(const vec2<int>& start_pos, const vec2
     return get_pathfinding_waypoints(start_pos_bounded, end_pos_bounded, pf_data, wall_dat);
 }
 
-void WorldMap::tick() {
+std::vector<Event> WorldMap::tick() {
+    std::vector<Event> out_events;
     tile_manager->tick();
+    int num_obs = obstacles.size();
+    if (currently_active_ob >= 0 && currently_active_ob < num_obs) {
+        std::vector<Event> ob_events = obstacles[currently_active_ob].tick();
+        for (auto event : ob_events)
+            out_events.push_back(event);
+    }
+    return out_events;
 }
 
 void WorldMap::draw(const vec2<int>& offset) {
@@ -263,7 +272,6 @@ void WorldMap::draw(const vec2<int>& offset) {
     }
 
     // draw current obstacle
-    if (currently_active_ob >= 0) {
+    if (currently_active_ob >= 0)
         obstacles[currently_active_ob].draw(offset);
-    }
 }

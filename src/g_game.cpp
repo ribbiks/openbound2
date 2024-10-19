@@ -15,16 +15,14 @@ Game::Game() : current_state(new G_MainMenu()) {
                          "assets/cursor_4.png"},
                          "assets/cursor_click.png",
                          "assets/cursor_shiftclick.png");
-    animation_manager = new AnimationManager;
+    animation_manager.add_animation("small_blue", "assets/M484explosionset1.png", {34,34});
 }
 
 Game::~Game() {
     delete camera;
     delete cursor;
-    delete animation_manager;
     camera = nullptr;
     cursor = nullptr;
-    animation_manager = nullptr;
 }
 
 void Game::change_state(std::unique_ptr<GameState> new_state) {
@@ -38,10 +36,16 @@ void Game::update(PlayerInputs* inputs, double frame_time) {
     current_state->update(this, inputs);
 }
 
-void Game::tick(PlayerInputs* inputs){
+void Game::tick(){
     cursor->tick();
-    animation_manager->tick();
-    current_state->tick(this, inputs);
+    std::vector<Event> state_events = current_state->tick(this);
+    for (auto event : state_events){
+        //printf("RAWR %s \n", event.type.c_str());
+        if (event.type == "start_animation") {
+            animation_manager.start_new_animation(event.data_str , event.data_str_2, event.data_vec, false, true);
+        }
+    }
+    animation_manager.tick();
 }
 
 void Game::draw() {

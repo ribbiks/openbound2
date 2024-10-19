@@ -22,6 +22,7 @@ struct ActiveAnimation {
     unsigned int current_frame;
     unsigned int current_tick_within_frame;
     bool is_looping;
+    bool is_centered;
 };
 
 class AnimationManager {
@@ -33,7 +34,7 @@ public:
     AnimationManager();
     ~AnimationManager();
     void add_animation(const std::string& name, const std::string& image_list, const vec2<int>& sprite_dimensions, const std::vector<int>& frames_per_image = {});
-    void start_new_animation(const std::string& name, const std::string& id, const vec2<int>& position, bool is_looping);
+    void start_new_animation(const std::string& name, const std::string& id, const vec2<int>& position, bool is_looping, bool is_centered = false);
     SDL_Texture* get_animating_texture(const std::string& id);
     void remove_animation(const std::string& id);
     void remove_all_animations();

@@ -35,6 +35,6 @@ public:
     void change_map_tiles(const std::vector<vec2<int>>& coord_list, const std::vector<int>& tileid_list);
     void set_current_obstacle(int obnum);
     std::vector<vec2<int>> pathfind(const vec2<int>& start_pos, const vec2<int>& end_pos);
-    void tick();
+    std::vector<Event> tick();
     void draw(const vec2<int>& offset);
 };

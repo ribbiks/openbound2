@@ -24,8 +24,9 @@ void G_MainMenu::update(Game* game, PlayerInputs* inputs) {
     }
 }
 
-void G_MainMenu::tick(Game* game, PlayerInputs* inputs) {
-    //
+std::vector<Event> G_MainMenu::tick(Game* game) {
+    std::vector<Event> out_events;
+    return out_events;
 }
 
 void G_MainMenu::draw(Game* game) {

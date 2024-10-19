@@ -32,12 +32,17 @@ void AnimationManager::add_animation(const std::string& name,
         SDL_FreeSurface(image_list[i]);
     }
     all_animations[name] = anim_dat;
+    printf("ADDED ANIMATION: %s %zu\n", name.c_str(), image_list.size());
 }
 
-void AnimationManager::start_new_animation(const std::string& name, const std::string& id, const vec2<int>& position, bool is_looping) {
+void AnimationManager::start_new_animation(const std::string& name,
+                                           const std::string& id,
+                                           const vec2<int>& position,
+                                           bool is_looping,
+                                           bool is_centered) {
     if (all_animations.count(name) == 0)
         throw std::invalid_argument("all_animations does not contain image with name " + name);
-    active_animations[id] = {name, position, 0, 0, is_looping};
+    active_animations[id] = {name, position, 0, 0, is_looping, is_centered};
 }
 
 SDL_Texture* AnimationManager::get_animating_texture(const std::string& id) {
@@ -86,10 +91,13 @@ void AnimationManager::draw(const vec2<int>& offset) {
         AnimationSequence* my_animdat = &all_animations[pair.second.name];
         unsigned int current_frame = pair.second.current_frame;
         vec2<int> position = pair.second.position;
-        SDL_Rect rect = {position.x + my_animdat->offsets[current_frame].x - offset.x,
-                         position.y + my_animdat->offsets[current_frame].y - offset.y,
-                         my_animdat->offsets[current_frame].x,
-                         my_animdat->offsets[current_frame].y};
+        vec2<int> centering_adj = {0,0};
+        if (pair.second.is_centered)
+            centering_adj = {my_animdat->sizes[current_frame].x / 2, my_animdat->sizes[current_frame].y / 2};
+        SDL_Rect rect = {position.x + my_animdat->offsets[current_frame].x - offset.x - centering_adj.x,
+                         position.y + my_animdat->offsets[current_frame].y - offset.y - centering_adj.y,
+                         my_animdat->sizes[current_frame].x,
+                         my_animdat->sizes[current_frame].y};
         SDL_RenderCopy(renderer, my_animdat->frames[current_frame], nullptr, &rect);
     }
 }

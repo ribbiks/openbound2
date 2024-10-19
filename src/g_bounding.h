@@ -23,6 +23,6 @@ public:
     G_Bounding(Game* game, const std::string& map_filename);
     ~G_Bounding() override;
     void update(Game* game, PlayerInputs* inputs) override;
-    void tick(Game* game, PlayerInputs* inputs) override;
+    std::vector<Event> tick(Game* game) override;
     void draw(Game* game) override;
 };

@@ -16,13 +16,13 @@ private:
     Cursor* cursor = nullptr;
 
 public:
-    AnimationManager* animation_manager = nullptr;
+    AnimationManager animation_manager;
     
     Game();
     ~Game();
     void change_state(std::unique_ptr<GameState> new_state);
     void update(PlayerInputs* inputs, double frame_time);
-    void tick(PlayerInputs* inputs);
+    void tick();
     void draw();
     vec2<int> get_camera_pos();
     vec2<int> get_camera_target();
