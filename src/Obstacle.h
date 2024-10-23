@@ -89,7 +89,6 @@ public:
             }
             //printf("tick: %i [%i]\n", ob_timer, ob_currentcount);
             if (execute_explosion) {
-                printf("Bang [%i]!\n", ob_currentcount);
                 for (size_t i = 0; i < ob_explosions[ob_currentcount].locs.size(); ++i) {
                     int loc_num = ob_explosions[ob_currentcount].locs[i];
                     Rect exp_loc = ob_locations[loc_num - 1];

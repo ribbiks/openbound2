@@ -32,7 +32,6 @@ void AnimationManager::add_animation(const std::string& name,
         SDL_FreeSurface(image_list[i]);
     }
     all_animations[name] = anim_dat;
-    printf("ADDED ANIMATION: %s %zu\n", name.c_str(), image_list.size());
 }
 
 void AnimationManager::start_new_animation(const std::string& name,

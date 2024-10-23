@@ -3,11 +3,13 @@
 #endif
 
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 
 #include <fmt/format.h>
 #include <SDL.h>
+#include <SDL_mixer.h>
 
 #include "Font.h"
 #include "globals.h"
@@ -91,10 +93,10 @@ void main_loop() {
         current_tic++;
         //
         // DEBUGGING STUFF
-        ////if (current_tic == 100) {
-        ////    game->animation_manager.add_animation("test", "assets/M484explosionset1.png", {34,34});
-        ////    game->animation_manager.start_new_animation("test", "anim_id_1", {128,384}, true);
-        ////}
+        if (current_tic == 200) {
+            game->audio_manager.load_sound("test", "assets/laser7.wav");
+            game->audio_manager.play_sound("test");
+        }
     }
 
     // drawing
@@ -114,7 +116,13 @@ void main_loop() {
 }
 
 int main() {
-    SDL_Init(SDL_INIT_VIDEO);
+    // init SDL
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
+        throw std::runtime_error("SDL initialization failed: " + std::string(SDL_GetError()));
+
+    // init SDL_mixer
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+        throw std::runtime_error("SDL_mixer initialization failed: " + std::string(Mix_GetError()));
 
     bool vsync = false;
 
@@ -127,7 +135,7 @@ int main() {
     //
     #else /////////////////////////////
     //
-    window = SDL_CreateWindow("OpenBound v0.1", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, RESOLUTION.x, RESOLUTION.y, 0);
+    window = SDL_CreateWindow("OpenBound v0.1", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, RESOLUTION.x, RESOLUTION.y, 0);
     if (vsync)
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     else
@@ -142,6 +150,7 @@ int main() {
 
     clear_game_globals();
 
+    Mix_CloseAudio();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

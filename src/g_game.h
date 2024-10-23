@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "AnimationManager.h"
+#include "AudioManager.h"
 #include "Camera.h"
 #include "Cursor.h"
 #include "inputs.h"
@@ -17,6 +18,7 @@ private:
 
 public:
     AnimationManager animation_manager;
+    AudioManager audio_manager;
     
     Game();
     ~Game();
